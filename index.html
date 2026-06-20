@@ -1,119 +1,152 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Diario de Obra</title>
-
-<!-- PWA Manifest inline -->
-<link rel="manifest" href="data:application/json;charset=utf-8,{
-  %22name%22: %22Diario de Obra%22,
-  %22short_name%22: %22Obra%22,
-  %22start_url%22: %22.%22,
-  %22display%22: %22standalone%22,
-  %22background_color%22: %22%231a1a1a%22,
-  %22theme_color%22: %22%23F5A623%22,
-  %22icons%22: [{
-    %22src%22: %22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%23F5A623'/%3E%3Ctext y='140' x='30' font-size='130' font-family='sans-serif'%3E%F0%9F%9A%A7%3C/text%3E%3C/svg%3E%22,
-    %22sizes%22: %22192x192%22,
-    %22type%22: %22image/svg+xml%22
-  }]
-}">
+<title>Journal de Chantier</title>
+<link rel="manifest" href="data:application/json;charset=utf-8,{%22name%22:%22Journal%20de%20Chantier%22,%22short_name%22:%22Chantier%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%23F5A623%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20192%20192'%3E%3Crect%20width='192'%20height='192'%20rx='32'%20fill='%23F5A623'/%3E%3Ctext%20y='140'%20x='30'%20font-size='130'%20font-family='sans-serif'%3E%F0%9F%9A%A7%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22}]}">
 <meta name="theme-color" content="#F5A623">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Diario de Obra">
-
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Chantier">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#111;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-.app{width:100%;max-width:480px;background:#1a1a1a;min-height:100vh}
-.header{background:#F5A623;padding:10px 14px 8px}
-.obra-selector{display:flex;align-items:center;gap:6px;margin-bottom:6px}
-.obra-selector select{background:rgba(0,0,0,0.15);border:none;color:#1a1a1a;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;flex:1;padding:3px 6px;border-radius:6px}
-.obra-selector select option{background:#222;color:#eee}
-.header-row{display:flex;justify-content:space-between;align-items:center}
-.fecha-nav{display:flex;align-items:center;gap:8px}
-.fecha-btn{background:rgba(0,0,0,0.15);border:none;color:#1a1a1a;width:26px;height:26px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+body{background:#f0f0f0;display:flex;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.app{width:100%;max-width:480px;background:#fff;min-height:100vh;box-shadow:0 0 24px rgba(0,0,0,0.08)}
+
+/* HEADER */
+.header{background:#F5A623;padding:10px 14px 10px}
+.obra-selector{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.obra-selector select{background:rgba(0,0,0,0.12);border:none;color:#1a1a1a;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;flex:1;padding:4px 8px;border-radius:6px}
+.obra-selector select option{background:#fff;color:#222}
+.header-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fecha-nav{display:flex;align-items:center;gap:6px;flex:1}
+.fecha-btn{background:rgba(0,0,0,0.12);border:none;color:#1a1a1a;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 .fecha-lbl{font-size:12px;color:#2a1a00;font-weight:600;flex:1}
-.clima-mini{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.12);border-radius:8px;padding:5px 10px}
-.clima-mini .temp{font-size:18px;font-weight:700;color:#1a1a1a}
-.clima-mini .det{font-size:10px;color:#2a1a00}
-.nav{display:flex;background:#252525;border-bottom:0.5px solid #333}
-.nb{flex:1;padding:9px 2px 7px;text-align:center;cursor:pointer;border:none;background:transparent;color:#666;font-size:9px;font-family:inherit;border-bottom:2px solid transparent;transition:color .15s}
-.nb i{display:block;font-size:19px;margin-bottom:1px}
+.clima-mini{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.12);border-radius:8px;padding:5px 10px;flex-shrink:0}
+.clima-mini .temp{font-size:18px;font-weight:700;color:#1a1a1a;line-height:1}
+.clima-mini .det{font-size:10px;color:#2a1a00;line-height:1.3}
+
+/* NAV */
+.nav{display:flex;background:#fff;border-bottom:1.5px solid #eee;position:sticky;top:0;z-index:10}
+.nb{flex:1;padding:9px 2px 7px;text-align:center;cursor:pointer;border:none;background:transparent;color:#aaa;font-size:9px;font-family:inherit;border-bottom:2px solid transparent;transition:color .15s}
+.nb i{display:block;font-size:20px;margin-bottom:1px}
 .nb.active{color:#F5A623;border-bottom-color:#F5A623}
-.content{background:#1E1E1E;min-height:calc(100vh - 130px);padding:12px}
+
+/* CONTENT */
+.content{background:#f7f7f7;min-height:calc(100vh - 130px);padding:12px}
 .tab{display:none}.tab.vis{display:block}
 .stitle{color:#F5A623;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
-.card{background:#2a2a2a;border-radius:8px;padding:11px;margin-bottom:8px;border:0.5px solid #383838}
-.clbl{font-size:10px;color:#777;margin-bottom:3px}
-.cval{font-size:14px;color:#F0EEE8;font-weight:600}
-.csub{font-size:11px;color:#777;margin-top:2px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}
-.bdg{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
-.bok{background:#1a3a1a;color:#6fd46f}.bwn{background:#3a2a00;color:#F5A623}.bal{background:#3a1a1a;color:#E8622A}
-.btn-primary{display:flex;align-items:center;justify-content:center;gap:5px;background:#F5A623;color:#1a1a1a;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;width:100%;margin-bottom:10px;font-family:inherit}
+.card{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #eee;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.clbl{font-size:10px;color:#999;margin-bottom:3px}
+.cval{font-size:14px;color:#1a1a1a;font-weight:600}
+.csub{font-size:11px;color:#999;margin-top:2px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.bok{background:#e8f5e9;color:#2e7d32}
+.bwn{background:#fff8e1;color:#f57f17}
+.bal{background:#fce4ec;color:#c62828}
+.bbl{background:#e3f2fd;color:#1565c0}
+
+/* BUTTONS */
+.btn-primary{display:flex;align-items:center;justify-content:center;gap:6px;background:#F5A623;color:#1a1a1a;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;font-family:inherit;box-shadow:0 2px 8px rgba(245,166,35,0.25)}
 .btn-primary:active{opacity:.85;transform:scale(.98)}
-.btn-sec{display:flex;align-items:center;justify-content:center;gap:5px;background:#252525;color:#ccc;border:0.5px solid #444;border-radius:8px;padding:9px;font-size:12px;cursor:pointer;width:100%;margin-bottom:8px;font-family:inherit}
-.li-item{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:0.5px solid #2e2e2e}
+.btn-sec{display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;color:#555;border:1px solid #ddd;border-radius:10px;padding:10px;font-size:12px;cursor:pointer;width:100%;margin-bottom:8px;font-family:inherit}
+.btn-sec:active{opacity:.8}
+.btn-danger{display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;color:#c62828;border:1px solid #ffcdd2;border-radius:10px;padding:10px;font-size:12px;cursor:pointer;width:100%;margin-bottom:8px;font-family:inherit}
+
+/* PERSONAL */
+.li-item{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid #f0f0f0}
 .li-item:last-child{border-bottom:none}
-.av{width:34px;height:34px;border-radius:50%;background:#333;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#F5A623;flex-shrink:0}
-.li-name{font-size:13px;color:#F0EEE8}
-.li-rol{font-size:10px;color:#777}
-.chk{margin-left:auto;width:28px;height:28px;border-radius:50%;border:1.5px solid #444;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:13px;transition:all .2s}
-.chk.pres{background:#1a3a1a;border-color:#3a7a3a;color:#6fd46f}
+.av{width:36px;height:36px;border-radius:50%;background:#FFF3E0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#F5A623;flex-shrink:0;border:1.5px solid #FFE0B2}
+.li-name{font-size:13px;color:#1a1a1a;font-weight:500}
+.li-rol{font-size:10px;color:#999}
+.chk{margin-left:auto;width:30px;height:30px;border-radius:50%;border:1.5px solid #ddd;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;transition:all .2s;background:#fff}
+.chk.pres{background:#e8f5e9;border-color:#81c784;color:#2e7d32}
+.chk.abs{background:#fce4ec;border-color:#ef9a9a;color:#c62828}
+
+/* FOTOS */
 .foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
-.fslot{aspect-ratio:1;background:#2a2a2a;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:0.5px solid #383838;cursor:pointer;position:relative;overflow:hidden;font-size:20px;color:#555;transition:all .2s}
+.fslot{aspect-ratio:1;background:#f5f5f5;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px dashed #ddd;cursor:pointer;position:relative;overflow:hidden;transition:all .2s}
 .fslot:active{transform:scale(.96)}
-.fslot.ok{background:#1a3a1a;border-color:#2a5a2a;color:#6fd46f}
-.fslot .fhora{position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,.65);color:#ccc;font-size:8px;padding:1px 4px;border-radius:3px}
-.fslot .flbl{font-size:9px;color:#555;margin-top:3px}
-.ped-item{padding:10px;background:#252525;border-radius:8px;margin-bottom:7px;border-left:3px solid #F5A623;display:flex;flex-direction:column;gap:3px}
-.ped-item.ent{border-left-color:#3a7a3a}.ped-item.urg{border-left-color:#E8622A}
-.ped-name{font-size:13px;color:#F0EEE8;font-weight:600}
-.ped-det{font-size:11px;color:#777;display:flex;justify-content:space-between;align-items:center}
-.eq-item{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:0.5px solid #2e2e2e}
+.fslot.ok{border:none;background:#000}
+.fslot img{width:100%;height:100%;object-fit:cover;border-radius:9px}
+.fhora{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;font-size:8px;padding:2px 5px;border-radius:4px}
+.fslot .ficon{font-size:22px;color:#ccc}
+.fslot .flbl{font-size:9px;color:#ccc;margin-top:3px}
+input[type=file]{display:none}
+
+/* PEDIDOS */
+.ped-item{padding:11px;background:#fff;border-radius:10px;margin-bottom:8px;border-left:3px solid #F5A623;border-top:1px solid #eee;border-right:1px solid #eee;border-bottom:1px solid #eee}
+.ped-item.ent{border-left-color:#43a047;opacity:.7}
+.ped-item.urg{border-left-color:#e53935}
+.ped-item.anu{border-left-color:#bbb;opacity:.5}
+.ped-name{font-size:13px;color:#1a1a1a;font-weight:600;margin-bottom:3px}
+.ped-det{font-size:11px;color:#999;display:flex;justify-content:space-between;align-items:center;margin-top:3px}
+.ped-actions{display:flex;gap:6px;margin-top:8px}
+.ped-btn{flex:1;padding:5px;border-radius:6px;border:1px solid #eee;background:#f9f9f9;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;color:#555}
+.ped-btn.recibido{border-color:#c8e6c9;background:#e8f5e9;color:#2e7d32}
+.ped-btn.anular{border-color:#ffcdd2;background:#fce4ec;color:#c62828}
+.ped-foto-preview{width:100%;margin-top:8px;border-radius:6px;object-fit:cover;max-height:120px;cursor:pointer}
+
+/* EQUIPOS */
+.eq-item{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid #f0f0f0}
 .eq-item:last-child{border-bottom:none}
-.eq-icon{width:36px;height:36px;background:#252525;border-radius:8px;display:flex;align-items:center;justify-content:center;border:0.5px solid #383838;font-size:18px;color:#F5A623;flex-shrink:0}
-.hora-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+.eq-icon{width:38px;height:38px;background:#FFF3E0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#F5A623;flex-shrink:0}
+
+/* CLIMA */
+.hora-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
 .hora-row::-webkit-scrollbar{display:none}
-.hslot{flex-shrink:0;background:#252525;border-radius:7px;padding:8px 9px;text-align:center;border:0.5px solid #383838;min-width:50px}
-.hslot.now{border-color:#F5A623;background:#2a2400}
-.hslot .ht{font-size:10px;color:#777}
-.hslot .hv{font-size:13px;font-weight:600;color:#F0EEE8;margin:3px 0}
-.hslot i{font-size:14px;color:#777}
+.hslot{flex-shrink:0;background:#fff;border-radius:8px;padding:8px 10px;text-align:center;border:1px solid #eee;min-width:52px}
+.hslot.now{border-color:#F5A623;background:#FFF8E1}
+.hslot .ht{font-size:10px;color:#999}
+.hslot .hv{font-size:13px;font-weight:700;color:#1a1a1a;margin:3px 0}
+.hslot i{font-size:14px;color:#aaa}
 .hslot.now i{color:#F5A623}
-.pres-sum{display:flex;gap:7px;margin-bottom:10px}
-.ps-card{flex:1;background:#2a2a2a;border-radius:8px;padding:10px;text-align:center;border:0.5px solid #383838}
-.ps-num{font-size:22px;font-weight:700;color:#F0EEE8}
-.ps-lbl{font-size:9px;color:#777;margin-top:1px}
-.ps-card.ok .ps-num{color:#6fd46f}
-.ps-card.aus .ps-num{color:#E8622A}
-.inp{background:#252525;border:0.5px solid #444;border-radius:8px;padding:9px 11px;color:#F0EEE8;font-size:13px;font-family:inherit;width:100%;margin-bottom:7px;outline:none}
-.inp:focus{border-color:#F5A623}
-.inp::placeholder{color:#555}
-.hist-day{background:#252525;border-radius:8px;padding:10px;margin-bottom:7px;border:0.5px solid #333;cursor:pointer}
-.hist-fecha{font-size:11px;color:#F5A623;font-weight:600}
-.hist-nota{font-size:11px;color:#888;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hist-stats{display:flex;gap:10px;margin-top:5px}
-.hist-stat{font-size:10px;color:#666;display:flex;align-items:center;gap:3px}
-.modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:100;align-items:center;justify-content:center}
-.modal-bg.vis{display:flex}
-.modal{background:#2a2a2a;border-radius:12px;padding:18px;width:90%;max-width:360px;border:0.5px solid #444;max-height:85vh;overflow-y:auto}
-.modal h3{color:#F5A623;font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.modal-close{float:right;background:none;border:none;color:#888;font-size:20px;cursor:pointer;line-height:1;padding:0}
-.tab-clima-cards{display:flex;gap:7px;margin-bottom:10px}
-.tcc{flex:1;background:#2a2a2a;border-radius:8px;padding:10px;text-align:center;border:0.5px solid #383838}
+.tab-clima-cards{display:flex;gap:8px;margin-bottom:10px}
+.tcc{flex:1;background:#fff;border-radius:10px;padding:10px;text-align:center;border:1px solid #eee}
 .tcc i{font-size:24px;color:#F5A623;display:block;margin-bottom:3px}
-.tcc .v{font-size:16px;font-weight:700;color:#F0EEE8}
-.tcc .l{font-size:10px;color:#777;margin-top:1px}
-.loading-clima{color:#888;font-size:12px;text-align:center;padding:30px;display:flex;flex-direction:column;align-items:center;gap:8px}
-.trash-btn{background:none;border:none;color:#555;cursor:pointer;padding:4px;font-size:14px;margin-left:8px}
-.trash-btn:hover{color:#E8622A}
+.tcc .v{font-size:16px;font-weight:700;color:#1a1a1a}
+.tcc .l{font-size:10px;color:#999;margin-top:1px}
+.loading-clima{color:#aaa;font-size:12px;text-align:center;padding:30px;display:flex;flex-direction:column;align-items:center;gap:8px}
+
+/* PRESENCIAS */
+.pres-sum{display:flex;gap:8px;margin-bottom:10px}
+.ps-card{flex:1;background:#fff;border-radius:10px;padding:10px;text-align:center;border:1px solid #eee}
+.ps-num{font-size:24px;font-weight:700;color:#1a1a1a}
+.ps-lbl{font-size:9px;color:#999;margin-top:1px}
+.ps-card.ok .ps-num{color:#2e7d32}
+.ps-card.aus .ps-num{color:#c62828}
+
+/* HISTORIAL */
+.hist-day{background:#fff;border-radius:10px;padding:11px;margin-bottom:7px;border:1px solid #eee;cursor:pointer}
+.hist-fecha{font-size:11px;color:#F5A623;font-weight:700}
+.hist-nota{font-size:11px;color:#999;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-stats{display:flex;gap:10px;margin-top:5px}
+.hist-stat{font-size:10px;color:#bbb;display:flex;align-items:center;gap:3px}
+
+/* INPUTS */
+.inp{background:#fff;border:1px solid #ddd;border-radius:8px;padding:9px 11px;color:#1a1a1a;font-size:13px;font-family:inherit;width:100%;margin-bottom:7px;outline:none}
+.inp:focus{border-color:#F5A623}
+.inp::placeholder{color:#bbb}
+
+/* MODALES */
+.modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
+.modal-bg.vis{display:flex}
+.modal{background:#fff;border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:480px;border-top:1px solid #eee;max-height:85vh;overflow-y:auto}
+.modal h3{color:#1a1a1a;font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.modal-close{float:right;background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;line-height:1;padding:0}
+.modal-handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px}
+
+/* TRASH */
+.trash-btn{background:none;border:none;color:#ccc;cursor:pointer;padding:4px 6px;font-size:15px;flex-shrink:0}
+.trash-btn:active{color:#e53935}
+
+/* SECTION SEPARATOR */
+.sep{height:1px;background:#eee;margin:12px 0}
 </style>
 </head>
 <body>
@@ -123,194 +156,215 @@ body{background:#111;display:flex;justify-content:center;align-items:flex-start;
   <div class="obra-selector">
     <i class="ti ti-building" style="font-size:16px;color:#1a1a1a"></i>
     <select id="obraSelect" onchange="cambiarObra()">
-      <option value="0">Edificio Corrientes 847</option>
-      <option value="1">Conjunto Las Heras</option>
-      <option value="2">Local Comercial Av. Rivadavia</option>
+      <option value="0">Chantier Principal — Thionck Essyl</option>
+      <option value="1">Chantier Nord</option>
+      <option value="2">Local Commercial</option>
     </select>
     <i class="ti ti-chevron-down" style="font-size:14px;color:#1a1a1a"></i>
   </div>
   <div class="header-row">
     <div class="fecha-nav">
-      <button class="fecha-btn" onclick="navFecha(-1)" aria-label="Día anterior"><i class="ti ti-chevron-left"></i></button>
+      <button class="fecha-btn" onclick="navFecha(-1)" aria-label="Jour précédent"><i class="ti ti-chevron-left"></i></button>
       <span class="fecha-lbl" id="fechaLbl"></span>
-      <button class="fecha-btn" onclick="navFecha(1)" aria-label="Día siguiente"><i class="ti ti-chevron-right"></i></button>
+      <button class="fecha-btn" onclick="navFecha(1)" aria-label="Jour suivant"><i class="ti ti-chevron-right"></i></button>
     </div>
     <div class="clima-mini">
       <i class="ti ti-sun" style="font-size:22px;color:#1a1a1a"></i>
-      <div><div class="temp" id="miniTemp">--°</div><div class="det" id="miniDet">cargando...</div></div>
+      <div><div class="temp" id="miniTemp">--°</div><div class="det" id="miniDet">chargement...</div></div>
     </div>
   </div>
 </div>
 
 <nav class="nav">
-  <button class="nb active" onclick="tab('clima',this)"><i class="ti ti-cloud-sun"></i>Clima</button>
-  <button class="nb" onclick="tab('diario',this)"><i class="ti ti-camera"></i>Diario</button>
-  <button class="nb" onclick="tab('materiales',this)"><i class="ti ti-package"></i>Materiales</button>
-  <button class="nb" onclick="tab('personal',this)"><i class="ti ti-users"></i>Personal</button>
-  <button class="nb" onclick="tab('equipos',this)"><i class="ti ti-crane"></i>Equipos</button>
+  <button class="nb active" onclick="tab('clima',this)"><i class="ti ti-cloud-sun"></i>Météo</button>
+  <button class="nb" onclick="tab('diario',this)"><i class="ti ti-camera"></i>Journal</button>
+  <button class="nb" onclick="tab('materiales',this)"><i class="ti ti-package"></i>Matériaux</button>
+  <button class="nb" onclick="tab('personal',this)"><i class="ti ti-users"></i>Personnel</button>
+  <button class="nb" onclick="tab('equipos',this)"><i class="ti ti-crane"></i>Engins</button>
 </nav>
 
 <div class="content">
 
+  <!-- MÉTÉO -->
   <div id="tab-clima" class="tab vis">
-    <div id="climaContent"><div class="loading-clima"><i class="ti ti-loader" style="font-size:28px;color:#F5A623"></i>Obteniendo clima...</div></div>
+    <div id="climaContent"><div class="loading-clima"><i class="ti ti-loader" style="font-size:28px;color:#F5A623"></i>Chargement météo...</div></div>
   </div>
 
+  <!-- JOURNAL -->
   <div id="tab-diario" class="tab">
-    <p class="stitle"><i class="ti ti-camera"></i>Fotos del día</p>
+    <p class="stitle"><i class="ti ti-camera"></i>Photos du jour</p>
     <div class="foto-grid" id="fotoGrid"></div>
-    <p class="stitle"><i class="ti ti-notes"></i>Nota del día</p>
-    <textarea class="inp" id="notaTexto" rows="3" placeholder="Avances, novedades, incidentes..."></textarea>
-    <button class="btn-primary" onclick="guardarNota()"><i class="ti ti-device-floppy"></i>Guardar nota</button>
-    <button class="btn-sec" onclick="exportarPDF()"><i class="ti ti-file-type-pdf"></i>Exportar reporte del día (PDF)</button>
-    <p class="stitle" style="margin-top:4px"><i class="ti ti-history"></i>Historial</p>
+    <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="onFotoSelected(event)">
+    <p class="stitle"><i class="ti ti-notes"></i>Note du jour</p>
+    <textarea class="inp" id="notaTexto" rows="3" placeholder="Avancement, incidents, observations..."></textarea>
+    <button class="btn-primary" onclick="guardarNota()"><i class="ti ti-device-floppy"></i>Enregistrer la note</button>
+    <button class="btn-sec" onclick="exportarPDF()"><i class="ti ti-file-type-pdf"></i>Exporter le rapport du jour (PDF)</button>
+    <button class="btn-sec" onclick="exportarHistorialPDF()"><i class="ti ti-file-export"></i>Exporter tout l'historique (PDF)</button>
+    <div class="sep"></div>
+    <p class="stitle"><i class="ti ti-history"></i>Historique</p>
     <div id="historialLista"></div>
   </div>
 
+  <!-- MATÉRIAUX -->
   <div id="tab-materiales" class="tab">
-    <button class="btn-primary" onclick="abrirModal('modalPedido')"><i class="ti ti-plus"></i>Nuevo pedido</button>
-    <p class="stitle"><i class="ti ti-package"></i>Pedidos activos</p>
+    <button class="btn-primary" onclick="abrirModal('modalPedido')"><i class="ti ti-plus"></i>Nouvelle commande</button>
+    <p class="stitle"><i class="ti ti-package"></i>Commandes en cours</p>
     <div id="pedidosLista"></div>
-    <p class="stitle" style="margin-top:4px"><i class="ti ti-alert-triangle"></i>Stock crítico</p>
+    <div class="sep"></div>
+    <p class="stitle"><i class="ti ti-alert-triangle"></i>Stock critique</p>
     <div class="g2">
-      <div class="card"><div class="clbl">Arena gruesa</div><div class="cval">1.2 m³</div><div class="csub"><span class="bdg bal">Bajo stock</span></div></div>
-      <div class="card"><div class="clbl">Encofrado madera</div><div class="cval">45 tablones</div><div class="csub"><span class="bdg bok">OK</span></div></div>
+      <div class="card"><div class="clbl">Sable grossier</div><div class="cval">1.2 m³</div><div class="csub"><span class="bdg bal">Stock bas</span></div></div>
+      <div class="card"><div class="clbl">Coffrage bois</div><div class="cval">45 planches</div><div class="csub"><span class="bdg bok">OK</span></div></div>
     </div>
   </div>
 
+  <!-- PERSONNEL -->
   <div id="tab-personal" class="tab">
     <div class="pres-sum">
-      <div class="ps-card ok"><div class="ps-num" id="cntPres">0</div><div class="ps-lbl">Presentes</div></div>
-      <div class="ps-card aus"><div class="ps-num" id="cntAus">0</div><div class="ps-lbl">Ausentes</div></div>
+      <div class="ps-card ok"><div class="ps-num" id="cntPres">0</div><div class="ps-lbl">Présents</div></div>
+      <div class="ps-card aus"><div class="ps-num" id="cntAus">0</div><div class="ps-lbl">Absents</div></div>
       <div class="ps-card"><div class="ps-num" id="cntTot">0</div><div class="ps-lbl">Total</div></div>
     </div>
-    <button class="btn-primary" onclick="abrirModal('modalPersona')"><i class="ti ti-user-plus"></i>Agregar persona</button>
-    <p class="stitle"><i class="ti ti-users"></i>Lista de personal</p>
-    <div id="personalLista"></div>
+    <button class="btn-primary" onclick="abrirModal('modalPersona')"><i class="ti ti-user-plus"></i>Ajouter une personne</button>
+    <p class="stitle"><i class="ti ti-users"></i>Liste du personnel</p>
+    <div class="card" id="personalLista"></div>
   </div>
 
+  <!-- ENGINS -->
   <div id="tab-equipos" class="tab">
-    <button class="btn-primary" onclick="abrirModal('modalEquipo')"><i class="ti ti-plus"></i>Agregar equipo</button>
-    <p class="stitle"><i class="ti ti-crane"></i>Equipos en obra</p>
-    <div id="equiposLista"></div>
+    <button class="btn-primary" onclick="abrirModal('modalEquipo')"><i class="ti ti-plus"></i>Ajouter un engin</button>
+    <p class="stitle"><i class="ti ti-crane"></i>Engins sur chantier</p>
+    <div class="card" id="equiposLista"></div>
   </div>
 
 </div>
 </div>
 
-<!-- MODALES -->
+<!-- MODAL COMMANDE -->
 <div class="modal-bg" id="modalPedido">
   <div class="modal">
+    <div class="modal-handle"></div>
     <button class="modal-close" onclick="cerrarModal('modalPedido')">×</button>
-    <h3><i class="ti ti-package"></i>Nuevo pedido</h3>
-    <input class="inp" id="mpNombre" placeholder="Material / producto">
-    <input class="inp" id="mpCantidad" placeholder="Cantidad (ej: 2 ton, 80 bolsas)">
-    <input class="inp" id="mpProveedor" placeholder="Proveedor">
+    <h3><i class="ti ti-package" style="color:#F5A623"></i>Nouvelle commande</h3>
+    <input class="inp" id="mpNombre" placeholder="Matériau / produit">
+    <input class="inp" id="mpCantidad" placeholder="Quantité (ex: 2 tonnes, 80 sacs)">
+    <input class="inp" id="mpProveedor" placeholder="Fournisseur">
     <select class="inp" id="mpEstado">
-      <option value="urg">Urgente</option>
-      <option value="transit">En tránsito</option>
-      <option value="ent">Entregado</option>
+      <option value="urg">Urgent</option>
+      <option value="transit">En transit</option>
+      <option value="ent">Livré</option>
     </select>
-    <button class="btn-primary" onclick="agregarPedido()"><i class="ti ti-check"></i>Guardar pedido</button>
+    <button class="btn-primary" onclick="agregarPedido()"><i class="ti ti-check"></i>Enregistrer</button>
   </div>
 </div>
 
+<!-- MODAL PERSONNEL -->
 <div class="modal-bg" id="modalPersona">
   <div class="modal">
+    <div class="modal-handle"></div>
     <button class="modal-close" onclick="cerrarModal('modalPersona')">×</button>
-    <h3><i class="ti ti-user-plus"></i>Agregar persona</h3>
-    <input class="inp" id="mpNombreP" placeholder="Nombre completo">
-    <input class="inp" id="mpRol" placeholder="Rol (Albañil, Oficial, etc.)">
-    <button class="btn-primary" onclick="agregarPersona()"><i class="ti ti-check"></i>Agregar</button>
+    <h3><i class="ti ti-user-plus" style="color:#F5A623"></i>Ajouter au personnel</h3>
+    <input class="inp" id="mpNombreP" placeholder="Nom complet">
+    <input class="inp" id="mpRol" placeholder="Rôle (Maçon, Chef, etc.)">
+    <button class="btn-primary" onclick="agregarPersona()"><i class="ti ti-check"></i>Ajouter</button>
   </div>
 </div>
 
+<!-- MODAL ENGIN -->
 <div class="modal-bg" id="modalEquipo">
   <div class="modal">
+    <div class="modal-handle"></div>
     <button class="modal-close" onclick="cerrarModal('modalEquipo')">×</button>
-    <h3><i class="ti ti-crane"></i>Agregar equipo</h3>
-    <input class="inp" id="meNombre" placeholder="Nombre del equipo">
+    <h3><i class="ti ti-crane" style="color:#F5A623"></i>Ajouter un engin</h3>
+    <input class="inp" id="meNombre" placeholder="Nom de l'engin">
     <select class="inp" id="meEstado">
-      <option value="ok">Operativo</option>
-      <option value="warn">En uso</option>
-      <option value="alert">Baja / Reparación</option>
+      <option value="ok">Opérationnel</option>
+      <option value="warn">En service</option>
+      <option value="alert">En panne / Réparation</option>
     </select>
-    <button class="btn-primary" onclick="agregarEquipo()"><i class="ti ti-check"></i>Agregar</button>
+    <button class="btn-primary" onclick="agregarEquipo()"><i class="ti ti-check"></i>Ajouter</button>
   </div>
 </div>
 
+<!-- MODAL HISTORIQUE -->
 <div class="modal-bg" id="modalHist">
   <div class="modal">
+    <div class="modal-handle"></div>
     <button class="modal-close" onclick="cerrarModal('modalHist')">×</button>
-    <h3 id="modalHistFecha"></h3>
+    <h3 id="modalHistFecha" style="color:#F5A623"></h3>
     <div id="modalHistContenido"></div>
   </div>
 </div>
 
 <script>
-// ── DATOS ───────────────────────────────────────────────
+// ── DONNÉES ─────────────────────────────────────────────
 const OBRAS=[
-  {nombre:"Edificio Corrientes 847",lat:-34.6037,lon:-58.3816},
-  {nombre:"Conjunto Las Heras",lat:-34.5875,lon:-58.4073},
-  {nombre:"Local Comercial Av. Rivadavia",lat:-34.6158,lon:-58.4333}
+  {nombre:"Chantier Principal — Thionck Essyl",lat:12.7599,lon:-16.0797},
+  {nombre:"Chantier Nord",lat:12.780,lon:-16.060},
+  {nombre:"Local Commercial",lat:12.750,lon:-16.090}
 ];
-const DIAS_L=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-const DIAS_S=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
-const MESES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
-const MESES_L=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const JOURS=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+const JOURS_C=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+const MOIS=["jan","fév","mar","avr","mai","juin","juil","août","sep","oct","nov","déc"];
+const MOIS_L=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 
 let obraIdx=0;
 let fechaActual=new Date(); fechaActual.setHours(0,0,0,0);
 const hoy=new Date(); hoy.setHours(0,0,0,0);
 let currentTabId='clima';
 let climaCache={};
+let fotoSlotIdx=null;
+let lastClimaData=null;
 
 let ESTADO={
   0:{
     personal:[
-      {n:"Carlos Mendez",r:"Albañil",i:"CM",p:true},
-      {n:"Roberto Díaz",r:"Oficial",i:"RD",p:true},
-      {n:"Lucas Fernández",r:"Carpintero",i:"LF",p:true},
-      {n:"Marcelo Torres",r:"Electricista",i:"MT",p:false},
-      {n:"Javier Ruiz",r:"Albañil",i:"JR",p:true},
-      {n:"Pablo Gómez",r:"Ayudante",i:"PG",p:true}
+      {n:"Mamadou Diallo",r:"Maçon",i:"MD",p:true},
+      {n:"Ibrahima Sow",r:"Chef d'équipe",i:"IS",p:true},
+      {n:"Ousmane Ndiaye",r:"Charpentier",i:"ON",p:true},
+      {n:"Fatou Diop",r:"Technicienne",i:"FD",p:false},
+      {n:"Cheikh Bâ",r:"Maçon",i:"CB",p:true},
+      {n:"Lamine Fall",r:"Aide",i:"LF",p:true}
     ],
     pedidos:[
-      {nombre:"Hierro Ø 12 mm",cantidad:"2.5 ton",proveedor:"Aceros del Norte",estado:"urg"},
-      {nombre:"Cemento Portland",cantidad:"80 bolsas",proveedor:"Loma Negra",estado:"transit"},
-      {nombre:"Ladrillos cerámicos",cantidad:"1.200 u",proveedor:"Cerámica Sur",estado:"ent"}
+      {nombre:"Fer à béton Ø12",cantidad:"2.5 tonnes",proveedor:"Aciers du Nord",estado:"urg",foto:null},
+      {nombre:"Ciment Portland",cantidad:"80 sacs",proveedor:"Lafarge",estado:"transit",foto:null},
+      {nombre:"Briques céramiques",cantidad:"1200 u",proveedor:"Briqueterie Sud",estado:"ent",foto:null}
     ],
     equipos:[
-      {nombre:"Mixer hormigonero",estado:"ok"},
-      {nombre:"Andamio tubular",estado:"warn"},
-      {nombre:"Compresor 200L",estado:"ok"},
-      {nombre:"Vibrador de hormigón",estado:"alert"},
-      {nombre:"Grúa torre",estado:"ok"}
+      {nombre:"Bétonnière",estado:"ok"},
+      {nombre:"Échafaudage tubulaire",estado:"warn"},
+      {nombre:"Compresseur 200L",estado:"ok"},
+      {nombre:"Vibrateur à béton",estado:"alert"},
+      {nombre:"Grue à tour",estado:"ok"}
     ],
     fotos:{},notas:{}
   },
   1:{
-    personal:[{n:"Sofía Ramírez",r:"Jefa de obra",i:"SR",p:true},{n:"Tomás Vega",r:"Albañil",i:"TV",p:false}],
-    pedidos:[{nombre:"Bloques de hormigón",cantidad:"500 u",proveedor:"HormiBlog",estado:"transit"}],
-    equipos:[{nombre:"Mixer chico",estado:"ok"}],
+    personal:[
+      {n:"Aliou Camara",r:"Chef de chantier",i:"AC",p:true},
+      {n:"Serigne Mbaye",r:"Maçon",i:"SM",p:false}
+    ],
+    pedidos:[{nombre:"Blocs de béton",cantidad:"500 u",proveedor:"Béton Plus",estado:"transit",foto:null}],
+    equipos:[{nombre:"Petite bétonnière",estado:"ok"}],
     fotos:{},notas:{}
   },
   2:{
-    personal:[{n:"Andrés Molina",r:"Electricista",i:"AM",p:true}],
+    personal:[{n:"Moussa Diallo",r:"Électricien",i:"MD",p:true}],
     pedidos:[],
-    equipos:[{nombre:"Escalera de aluminio",estado:"ok"}],
+    equipos:[{nombre:"Échelle aluminium",estado:"ok"}],
     fotos:{},notas:{}
   }
 };
 
-// ── FECHAS ──────────────────────────────────────────────
+// ── DATES ────────────────────────────────────────────────
 function fechaKey(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function fmtFecha(d){
   const esHoy=d.getTime()===hoy.getTime();
   const esAyer=d.getTime()===hoy.getTime()-86400000;
-  if(esHoy)return'Hoy · '+DIAS_L[d.getDay()]+' '+d.getDate()+' '+MESES[d.getMonth()];
-  if(esAyer)return'Ayer · '+d.getDate()+' '+MESES[d.getMonth()];
-  return DIAS_L[d.getDay()]+' '+d.getDate()+' '+MESES_L[d.getMonth()];
+  if(esHoy)return"Aujourd'hui · "+JOURS[d.getDay()]+' '+d.getDate()+' '+MOIS[d.getMonth()];
+  if(esAyer)return'Hier · '+d.getDate()+' '+MOIS[d.getMonth()];
+  return JOURS[d.getDay()]+' '+d.getDate()+' '+MOIS_L[d.getMonth()];
 }
 function actualizarFecha(){document.getElementById('fechaLbl').textContent=fmtFecha(fechaActual)}
 function navFecha(dir){
@@ -334,123 +388,205 @@ function renderTabActual(){
   else if(currentTabId==='personal')renderPersonal();
   else if(currentTabId==='equipos')renderEquipos();
 }
-function cambiarObra(){obraIdx=parseInt(document.getElementById('obraSelect').value);climaCache={};fetchClima();renderTabActual()}
+function cambiarObra(){obraIdx=parseInt(document.getElementById('obraSelect').value);climaCache={};lastClimaData=null;fetchClima();renderTabActual()}
 
-// ── CLIMA ─────────────────────────────────────────────────
+// ── MÉTÉO ─────────────────────────────────────────────────
 function wmoIcon(c){if(c===0)return'ti-sun';if(c<=2)return'ti-cloud-sun';if(c<=3)return'ti-cloud';if(c<=49)return'ti-cloud-fog';if(c<=67)return'ti-cloud-rain';if(c<=77)return'ti-snowflake';return'ti-cloud-storm'}
-function wmoDesc(c){if(c===0)return'Despejado';if(c<=2)return'Parcial. nublado';if(c<=3)return'Nublado';if(c<=49)return'Niebla';if(c<=67)return'Lluvia';if(c<=77)return'Nieve';return'Tormenta'}
+function wmoDesc(c){if(c===0)return'Ensoleillé';if(c<=2)return'Peu nuageux';if(c<=3)return'Nuageux';if(c<=49)return'Brouillard';if(c<=67)return'Pluie';if(c<=77)return'Neige';return'Orage'}
 
 async function fetchClima(){
   const obra=OBRAS[obraIdx];
   const key=obraIdx+'_'+fechaKey(fechaActual);
-  document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-loader" style="font-size:28px;color:#F5A623"></i>Cargando clima...</div>';
+  document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-loader" style="font-size:28px;color:#F5A623"></i>Chargement météo...</div>';
   document.getElementById('miniTemp').textContent='--°';
-  document.getElementById('miniDet').textContent='cargando...';
+  document.getElementById('miniDet').textContent='chargement...';
   if(climaCache[key]){renderClimaData(climaCache[key]);return}
   try{
     const url=`https://api.open-meteo.com/v1/forecast?latitude=${obra.lat}&longitude=${obra.lon}&hourly=temperature_2m,precipitation_probability,weathercode,windspeed_10m&current_weather=true&timezone=auto&forecast_days=1`;
     const r=await fetch(url);
     const d=await r.json();
-    climaCache[key]=d; renderClimaData(d);
+    climaCache[key]=d; lastClimaData=d; renderClimaData(d);
   }catch(e){
-    document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-wifi-off" style="font-size:28px;color:#888"></i>Sin conexión — datos no disponibles</div>';
+    document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-wifi-off" style="font-size:28px;color:#ccc"></i>Pas de connexion</div>';
   }
 }
-
 function renderClimaData(d){
+  lastClimaData=d;
   const cw=d.current_weather;
   const temp=Math.round(cw.temperature);
   const wind=Math.round(cw.windspeed);
   const desc=wmoDesc(cw.weathercode);
-  const hours=d.hourly.time.map((t,i)=>({hora:t.split('T')[1].slice(0,5),temp:Math.round(d.hourly.temperature_2m[i]),lluvia:d.hourly.precipitation_probability[i],wc:d.hourly.weathercode[i]})).filter((_,i)=>i%2===0).slice(0,8);
-  const maxLluvia=Math.max(...hours.map(h=>h.lluvia||0));
-  const alerta=maxLluvia>70?`<span class="bdg bal">Alerta: lluvia probable ${maxLluvia}%</span>`:`<span class="bdg bok">Sin alertas — condiciones aptas</span>`;
+  const hours=d.hourly.time.map((t,i)=>({hora:t.split('T')[1].slice(0,5),temp:Math.round(d.hourly.temperature_2m[i]),lluvia:d.hourly.precipitation_probability[i]||0,wc:d.hourly.weathercode[i]})).filter((_,i)=>i%2===0).slice(0,8);
+  const maxLluvia=Math.max(...hours.map(h=>h.lluvia));
+  const alerta=maxLluvia>70?`<span class="bdg bal">Alerte: pluie probable ${maxLluvia}%</span>`:`<span class="bdg bok">Pas d'alerte — conditions favorables</span>`;
   document.getElementById('miniTemp').textContent=temp+'°';
   document.getElementById('miniDet').textContent=desc;
   document.getElementById('climaContent').innerHTML=`
-    <p class="stitle"><i class="ti ti-cloud-sun"></i>Condiciones actuales</p>
+    <p class="stitle"><i class="ti ti-cloud-sun"></i>Conditions actuelles — Thionck Essyl</p>
     <div class="tab-clima-cards">
-      <div class="tcc"><i class="ti ti-temperature"></i><div class="v">${temp}°C</div><div class="l">Temperatura</div></div>
-      <div class="tcc"><i class="ti ti-droplet"></i><div class="v">${hours[0]?.lluvia??'--'}%</div><div class="l">Prob. lluvia</div></div>
-      <div class="tcc"><i class="ti ti-wind"></i><div class="v">${wind} km/h</div><div class="l">Viento</div></div>
+      <div class="tcc"><i class="ti ti-temperature"></i><div class="v">${temp}°C</div><div class="l">Température</div></div>
+      <div class="tcc"><i class="ti ti-droplet"></i><div class="v">${hours[0]?.lluvia??'--'}%</div><div class="l">Prob. pluie</div></div>
+      <div class="tcc"><i class="ti ti-wind"></i><div class="v">${wind} km/h</div><div class="l">Vent</div></div>
     </div>
-    <p class="stitle"><i class="ti ti-clock"></i>Pronóstico hora a hora</p>
+    <p class="stitle"><i class="ti ti-clock"></i>Prévisions heure par heure</p>
     <div class="hora-row">${hours.map((h,i)=>`<div class="hslot${i===1?' now':''}"><div class="ht">${h.hora}</div><div class="hv">${h.temp}°</div><i class="ti ${wmoIcon(h.wc)}"></i></div>`).join('')}</div>
-    <div class="card"><div class="clbl">Estado meteorológico</div><div style="margin-top:5px">${alerta}</div><div class="csub" style="margin-top:5px">${maxLluvia>70?'Evaluar suspensión de trabajos en altura u hormigonado.':'Temperatura y viento dentro de rangos normales de trabajo.'}</div></div>`;
+    <div class="card"><div class="clbl">État météorologique</div><div style="margin-top:6px">${alerta}</div><div class="csub" style="margin-top:5px">${maxLluvia>70?'Évaluer la suspension des travaux en hauteur ou du bétonnage.':'Température et vent dans les plages normales de travail.'}</div></div>`;
 }
 function renderClima(){fetchClima()}
 
-// ── DIARIO ────────────────────────────────────────────────
+// ── JOURNAL / FOTOS ──────────────────────────────────────
 function renderDiario(){
   const fk=fechaKey(fechaActual);
   const est=ESTADO[obraIdx];
   if(!est.fotos[fk])est.fotos[fk]=Array(6).fill(null);
   document.getElementById('notaTexto').value=est.notas[fk]||'';
-  document.getElementById('fotoGrid').innerHTML=est.fotos[fk].map((f,i)=>
-    f?`<div class="fslot ok" onclick="eliminarFoto(${i})"><i class="ti ti-check"></i><span class="fhora">${f}</span></div>`
-     :`<div class="fslot" onclick="tomarFoto(${i})"><i class="ti ti-camera"></i><div class="flbl">Foto ${i+1}</div></div>`
-  ).join('');
+  document.getElementById('fotoGrid').innerHTML=est.fotos[fk].map((f,i)=>{
+    if(f){
+      return`<div class="fslot ok" onclick="eliminarFoto(${i})">
+        <img src="${f.src}" alt="Photo ${i+1}">
+        <span class="fhora">${f.hora}</span>
+      </div>`;
+    }
+    return`<div class="fslot" onclick="abrirCamara(${i})">
+      <i class="ti ti-camera ficon"></i>
+      <div class="flbl">Photo ${i+1}</div>
+    </div>`;
+  }).join('');
   const hist=Object.entries(est.notas).filter(([k])=>k!==fk).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,5);
-  document.getElementById('historialLista').innerHTML=hist.length===0?'<div style="color:#555;font-size:12px;padding:8px 0">Sin registros anteriores</div>':
+  document.getElementById('historialLista').innerHTML=hist.length===0?'<div style="color:#bbb;font-size:12px;padding:8px 0">Aucun enregistrement précédent</div>':
     hist.map(([k,n])=>{
       const [y,m,d]=k.split('-');const fd=new Date(y,m-1,d);
       const fCnt=(est.fotos[k]||[]).filter(Boolean).length;
       return`<div class="hist-day" onclick="verHistorial('${k}')">
-        <div class="hist-fecha">${DIAS_S[fd.getDay()]} ${fd.getDate()} ${MESES[fd.getMonth()]} ${y}</div>
-        <div class="hist-nota">${n||'Sin nota'}</div>
-        <div class="hist-stats"><span class="hist-stat"><i class="ti ti-camera" style="font-size:11px"></i>${fCnt} fotos</span></div>
+        <div class="hist-fecha">${JOURS_C[fd.getDay()]} ${fd.getDate()} ${MOIS[fd.getMonth()]} ${y}</div>
+        <div class="hist-nota">${n||'Sans note'}</div>
+        <div class="hist-stats"><span class="hist-stat"><i class="ti ti-camera" style="font-size:11px"></i>${fCnt} photo(s)</span></div>
       </div>`;}).join('');
 }
-function tomarFoto(i){
-  const fk=fechaKey(fechaActual);
-  if(!ESTADO[obraIdx].fotos[fk])ESTADO[obraIdx].fotos[fk]=Array(6).fill(null);
-  const now=new Date();
-  ESTADO[obraIdx].fotos[fk][i]=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  renderDiario();
+
+function abrirCamara(idx){
+  fotoSlotIdx=idx;
+  document.getElementById('fileInput').click();
 }
-function eliminarFoto(i){if(confirm('¿Eliminar esta foto?')){ESTADO[obraIdx].fotos[fechaKey(fechaActual)][i]=null;renderDiario();}}
+
+function onFotoSelected(e){
+  const file=e.target.files[0];
+  if(!file||fotoSlotIdx===null)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const fk=fechaKey(fechaActual);
+    if(!ESTADO[obraIdx].fotos[fk])ESTADO[obraIdx].fotos[fk]=Array(6).fill(null);
+    const now=new Date();
+    ESTADO[obraIdx].fotos[fk][fotoSlotIdx]={
+      src:ev.target.result,
+      hora:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')
+    };
+    fotoSlotIdx=null;
+    e.target.value='';
+    renderDiario();
+  };
+  reader.readAsDataURL(file);
+}
+
+function eliminarFoto(i){
+  if(confirm('Supprimer cette photo ?')){
+    ESTADO[obraIdx].fotos[fechaKey(fechaActual)][i]=null;
+    renderDiario();
+  }
+}
+
 function guardarNota(){
   const txt=document.getElementById('notaTexto').value.trim();
   if(!txt)return;
   ESTADO[obraIdx].notas[fechaKey(fechaActual)]=txt;
   renderDiario();
-  alert('Nota guardada');
+  alert('Note enregistrée');
 }
+
 function verHistorial(k){
   const est=ESTADO[obraIdx];
   const [y,m,d]=k.split('-');const fd=new Date(y,m-1,d);
-  document.getElementById('modalHistFecha').textContent=DIAS_L[fd.getDay()]+' '+fd.getDate()+' de '+MESES_L[fd.getMonth()]+' de '+y;
   const fotos=(est.fotos[k]||[]).filter(Boolean);
+  document.getElementById('modalHistFecha').textContent=JOURS[fd.getDay()]+' '+fd.getDate()+' '+MOIS_L[fd.getMonth()]+' '+y;
   document.getElementById('modalHistContenido').innerHTML=`
-    <div style="margin-bottom:10px"><div class="clbl">Nota</div><div style="font-size:12px;color:#ccc;margin-top:4px">${est.notas[k]||'Sin nota'}</div></div>
-    <div><div class="clbl">Fotos</div><div style="font-size:12px;color:#ccc;margin-top:4px">${fotos.length>0?fotos.map(f=>'📷 '+f).join('  ·  '):'Sin fotos'}</div></div>`;
+    <div style="margin-bottom:12px"><div class="clbl">Note</div><div style="font-size:13px;color:#333;margin-top:4px">${est.notas[k]||'Sans note'}</div></div>
+    <div class="clbl" style="margin-bottom:6px">Photos (${fotos.length})</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+      ${fotos.map(f=>`<img src="${f.src}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px">`).join('')}
+    </div>`;
   abrirModal('modalHist');
 }
 
-// ── MATERIALES ────────────────────────────────────────────
+// ── MATÉRIAUX ─────────────────────────────────────────────
 function renderMateriales(){
   const peds=ESTADO[obraIdx].pedidos;
-  document.getElementById('pedidosLista').innerHTML=peds.length===0?'<div style="color:#555;font-size:12px;padding:8px 0">Sin pedidos activos</div>':
-    peds.map((p,i)=>`<div class="ped-item ${p.estado==='ent'?'ent':p.estado==='urg'?'urg':''}">
+  if(!peds.length){document.getElementById('pedidosLista').innerHTML='<div style="color:#bbb;font-size:12px;padding:8px 0">Aucune commande active</div>';return;}
+  document.getElementById('pedidosLista').innerHTML=peds.map((p,i)=>{
+    const cls=p.estado==='enu'?'anu':p.estado==='ent'?'ent':p.estado==='urg'?'urg':'';
+    const estLabel={urg:'Urgent',transit:'En transit',ent:'Livré',enu:'Annulé'}[p.estado]||'';
+    const estBdg={urg:'bal',transit:'bwn',ent:'bok',enu:''}[p.estado]||'';
+    const fotoHtml=p.foto?`<img src="${p.foto}" class="ped-foto-preview" onclick="verFotoPedido(${i})" alt="Photo commande">`:'';
+    const actions=p.estado!=='enu'?`
+      <div class="ped-actions">
+        ${p.estado!=='ent'?`<button class="ped-btn recibido" onclick="marcarPedido(${i},'ent')"><i class="ti ti-check"></i>Reçu</button>`:''}
+        <button class="ped-btn" onclick="pedidoFoto(${i})"><i class="ti ti-camera"></i>Photo</button>
+        <button class="ped-btn anular" onclick="marcarPedido(${i},'enu')"><i class="ti ti-x"></i>Annuler</button>
+      </div>`:'';
+    return`<div class="ped-item ${cls}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div class="ped-name">${p.nombre}</div>
-        <button class="trash-btn" onclick="eliminarPedido(${i})"><i class="ti ti-trash"></i></button>
+        ${estLabel?`<span class="bdg ${estBdg}">${estLabel}</span>`:''}
       </div>
-      <div class="ped-det"><span>${p.proveedor}</span><span class="bdg ${p.estado==='ent'?'bok':p.estado==='urg'?'bal':'bwn'}">${p.estado==='ent'?'Entregado':p.estado==='urg'?'Urgente':'En tránsito'}</span></div>
-      <div class="ped-det"><span>${p.cantidad}</span></div>
-    </div>`).join('');
+      <div class="ped-det"><span>${p.proveedor}</span><span>${p.cantidad}</span></div>
+      ${fotoHtml}
+      ${actions}
+    </div>`;
+  }).join('');
 }
+
+let pedidoFotoIdx=null;
+function pedidoFoto(i){
+  pedidoFotoIdx=i;
+  fotoSlotIdx=null;
+  const fi=document.getElementById('fileInput');
+  fi.onchange=function(e){
+    const file=e.target.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      ESTADO[obraIdx].pedidos[pedidoFotoIdx].foto=ev.target.result;
+      fi.onchange=onFotoSelected;
+      e.target.value='';
+      renderMateriales();
+    };
+    reader.readAsDataURL(file);
+  };
+  fi.click();
+}
+function verFotoPedido(i){
+  const f=ESTADO[obraIdx].pedidos[i].foto;
+  if(f){
+    document.getElementById('modalHistFecha').textContent='Photo de livraison';
+    document.getElementById('modalHistContenido').innerHTML=`<img src="${f}" style="width:100%;border-radius:8px">`;
+    abrirModal('modalHist');
+  }
+}
+
+function marcarPedido(i,estado){
+  ESTADO[obraIdx].pedidos[i].estado=estado;
+  renderMateriales();
+}
+
 function agregarPedido(){
   const n=document.getElementById('mpNombre').value.trim();
   if(!n)return;
-  ESTADO[obraIdx].pedidos.unshift({nombre:n,cantidad:document.getElementById('mpCantidad').value.trim()||'—',proveedor:document.getElementById('mpProveedor').value.trim()||'—',estado:document.getElementById('mpEstado').value});
+  ESTADO[obraIdx].pedidos.unshift({nombre:n,cantidad:document.getElementById('mpCantidad').value.trim()||'—',proveedor:document.getElementById('mpProveedor').value.trim()||'—',estado:document.getElementById('mpEstado').value,foto:null});
   cerrarModal('modalPedido');
   ['mpNombre','mpCantidad','mpProveedor'].forEach(id=>document.getElementById(id).value='');
   renderMateriales();
 }
-function eliminarPedido(i){if(confirm('¿Eliminar pedido?')){ESTADO[obraIdx].pedidos.splice(i,1);renderMateriales();}}
 
-// ── PERSONAL ──────────────────────────────────────────────
+// ── PERSONNEL ─────────────────────────────────────────────
 function renderPersonal(){
   const pers=ESTADO[obraIdx].personal;
   const pres=pers.filter(p=>p.p).length;
@@ -461,33 +597,33 @@ function renderPersonal(){
     <div class="li-item">
       <div class="av">${p.i}</div>
       <div style="flex:1"><div class="li-name">${p.n}</div><div class="li-rol">${p.r}</div></div>
-      <div class="chk ${p.p?'pres':''}" onclick="togglePres(${i})">
-        <i class="ti ${p.p?'ti-check':'ti-x'}" style="font-size:13px"></i>
+      <div class="chk ${p.p?'pres':'abs'}" onclick="togglePres(${i})" title="${p.p?'Présent — cliquer pour marquer absent':'Absent — cliquer pour marquer présent'}">
+        <i class="ti ${p.p?'ti-check':'ti-x'}" style="font-size:14px"></i>
       </div>
       <button class="trash-btn" onclick="eliminarPersona(${i})"><i class="ti ti-trash"></i></button>
-    </div>`).join('');
+    </div>`).join('') || '<div style="color:#bbb;font-size:12px;padding:8px 0">Aucun personnel enregistré</div>';
 }
 function togglePres(i){ESTADO[obraIdx].personal[i].p=!ESTADO[obraIdx].personal[i].p;renderPersonal()}
 function agregarPersona(){
   const n=document.getElementById('mpNombreP').value.trim();
   if(!n)return;
   const ini=n.split(' ').slice(0,2).map(x=>x[0].toUpperCase()).join('');
-  ESTADO[obraIdx].personal.push({n,r:document.getElementById('mpRol').value.trim()||'Sin rol',i:ini,p:true});
+  ESTADO[obraIdx].personal.push({n,r:document.getElementById('mpRol').value.trim()||'Sans rôle',i:ini,p:true});
   cerrarModal('modalPersona');
   document.getElementById('mpNombreP').value='';document.getElementById('mpRol').value='';
   renderPersonal();
 }
-function eliminarPersona(i){if(confirm('¿Eliminar persona?')){ESTADO[obraIdx].personal.splice(i,1);renderPersonal();}}
+function eliminarPersona(i){if(confirm('Supprimer cette personne ?')){ESTADO[obraIdx].personal.splice(i,1);renderPersonal();}}
 
-// ── EQUIPOS ───────────────────────────────────────────────
-const EQ_ICONS={'Mixer hormigonero':'ti-truck','Andamio tubular':'ti-ladder','Compresor 200L':'ti-engine','Vibrador de hormigón':'ti-tool','Grúa torre':'ti-crane','Mixer chico':'ti-truck','Escalera de aluminio':'ti-ladder'};
+// ── ENGINS ────────────────────────────────────────────────
+const EQ_ICONS={'Bétonnière':'ti-truck','Échafaudage tubulaire':'ti-ladder','Compresseur 200L':'ti-engine','Vibrateur à béton':'ti-tool','Grue à tour':'ti-crane','Petite bétonnière':'ti-truck','Échelle aluminium':'ti-ladder'};
 function renderEquipos(){
   const eqs=ESTADO[obraIdx].equipos;
-  document.getElementById('equiposLista').innerHTML=eqs.length===0?'<div style="color:#555;font-size:12px;padding:8px 0">Sin equipos registrados</div>':
+  document.getElementById('equiposLista').innerHTML=eqs.length===0?'<div style="color:#bbb;font-size:12px;padding:8px 0">Aucun engin enregistré</div>':
     eqs.map((e,i)=>`<div class="eq-item">
       <div class="eq-icon"><i class="ti ${EQ_ICONS[e.nombre]||'ti-tool'}"></i></div>
-      <div style="flex:1"><div style="font-size:13px;color:#F0EEE8;font-weight:500">${e.nombre}</div><div style="font-size:10px;color:#777">${e.estado==='ok'?'Operativo':e.estado==='warn'?'En uso':'Baja / Reparación'}</div></div>
-      <span class="bdg ${e.estado==='ok'?'bok':e.estado==='warn'?'bwn':'bal'}">${e.estado==='ok'?'OK':e.estado==='warn'?'En uso':'Baja'}</span>
+      <div style="flex:1"><div style="font-size:13px;color:#1a1a1a;font-weight:500">${e.nombre}</div><div style="font-size:10px;color:#999">${{ok:'Opérationnel',warn:'En service',alert:'En panne / Réparation'}[e.estado]}</div></div>
+      <span class="bdg ${{ok:'bok',warn:'bwn',alert:'bal'}[e.estado]}">${{ok:'OK',warn:'En use',alert:'Panne'}[e.estado]}</span>
       <button class="trash-btn" onclick="eliminarEquipo(${i})"><i class="ti ti-trash"></i></button>
     </div>`).join('');
 }
@@ -498,46 +634,132 @@ function agregarEquipo(){
   cerrarModal('modalEquipo');document.getElementById('meNombre').value='';
   renderEquipos();
 }
-function eliminarEquipo(i){if(confirm('¿Eliminar equipo?')){ESTADO[obraIdx].equipos.splice(i,1);renderEquipos();}}
+function eliminarEquipo(i){if(confirm('Supprimer cet engin ?')){ESTADO[obraIdx].equipos.splice(i,1);renderEquipos();}}
 
-// ── PDF ───────────────────────────────────────────────────
+// ── PDF JOUR ──────────────────────────────────────────────
+function getClimaInfo(){
+  if(!lastClimaData)return{temp:'N/D',lluvia:'N/D',viento:'N/D',desc:'Non disponible'};
+  const cw=lastClimaData.current_weather;
+  const hours=lastClimaData.hourly;
+  return{
+    temp:Math.round(cw.temperature)+'°C',
+    lluvia:(hours.precipitation_probability[0]||0)+'%',
+    viento:Math.round(cw.windspeed)+' km/h',
+    desc:wmoDesc(cw.weathercode)
+  };
+}
+
+function buildPDF(doc,obra,fk,est,fechaStr,inclClima=true){
+  const W=210;let y=0;
+  const amarillo=[245,166,35];
+  const oscuro=[26,26,26];
+  const gris=[120,120,120];
+
+  doc.setFillColor(...amarillo);doc.rect(0,0,W,32,'F');
+  doc.setFontSize(16);doc.setTextColor(...oscuro);doc.setFont('helvetica','bold');
+  doc.text('JOURNAL DE CHANTIER',14,13);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text(obra.nombre,14,21);doc.text(fechaStr,14,28);
+  y=40;
+
+  if(inclClima){
+    const cl=getClimaInfo();
+    doc.setFillColor(255,248,225);doc.rect(14,y,W-28,18,'F');
+    doc.setFontSize(9);doc.setTextColor(...oscuro);doc.setFont('helvetica','bold');
+    doc.text('MÉTÉO — Thionck Essyl',17,y+6);
+    doc.setFont('helvetica','normal');doc.setTextColor(...gris);
+    doc.text(`Température: ${cl.temp}   Pluie: ${cl.lluvia}   Vent: ${cl.viento}   ${cl.desc}`,17,y+13);
+    y+=24;
+  }
+
+  const sec=(t)=>{
+    if(y>265){doc.addPage();y=20;}
+    doc.setFillColor(...oscuro);doc.rect(14,y,W-28,7,'F');
+    doc.setFontSize(9);doc.setTextColor(...amarillo);doc.setFont('helvetica','bold');
+    doc.text(t,17,y+5);y+=11;
+    doc.setTextColor(...oscuro);doc.setFont('helvetica','normal');doc.setFontSize(10);
+  };
+  const lin=(t,col)=>{
+    if(y>270){doc.addPage();y=20;}
+    if(col)doc.setTextColor(...col); else doc.setTextColor(...gris);
+    doc.setFontSize(10);doc.setFont('helvetica','normal');
+    const lines=doc.splitTextToSize(t,W-30);
+    doc.text(lines,17,y);y+=lines.length*5+2;
+  };
+
+  const nota=est.notas[fk]||'Sans note enregistrée';
+  const fotos=(est.fotos[fk]||[]).filter(Boolean);
+  const presentes=est.personal.filter(p=>p.p);
+  const ausentes=est.personal.filter(p=>!p.p);
+
+  sec('NOTE DU JOUR');lin(nota);y+=3;
+  sec(`PHOTOS (${fotos.length})`);
+  lin(fotos.length>0?fotos.map(f=>'📷 '+f.hora).join('   '):'Aucune photo enregistrée');
+  y+=3;
+  sec(`PERSONNEL PRÉSENT (${presentes.length}/${est.personal.length})`);
+  presentes.forEach(p=>lin('✓  '+p.n+' — '+p.r));
+  if(ausentes.length>0){y+=2;doc.setTextColor(198,40,40);doc.setFontSize(9);doc.text('Absents:',17,y);y+=5;ausentes.forEach(p=>{doc.text('✗  '+p.n+' — '+p.r,22,y);y+=5;});}
+  doc.setTextColor(...oscuro);y+=3;
+  sec('COMMANDES ET MATÉRIAUX');
+  est.pedidos.length>0?est.pedidos.forEach(p=>lin('['+{ent:'LIVRÉ',urg:'URGENT',transit:'EN TRANSIT',enu:'ANNULÉ'}[p.estado]+'] '+p.nombre+' — '+p.cantidad+' ('+p.proveedor+')')):lin('Aucune commande active');
+  y+=3;
+  sec('ENGINS SUR CHANTIER');
+  est.equipos.length>0?est.equipos.forEach(e=>lin('['+{ok:'OK',warn:'EN SERVICE',alert:'PANNE'}[e.estado]+'] '+e.nombre)):lin('Aucun engin enregistré');
+
+  y+=10;
+  doc.setDrawColor(220,220,220);doc.line(14,y,W-14,y);y+=6;
+  doc.setFontSize(8);doc.setTextColor(...gris);
+  doc.text('Généré par Journal de Chantier · '+new Date().toLocaleString('fr-FR'),14,y);
+  return y;
+}
+
 function exportarPDF(){
   const obra=OBRAS[obraIdx];
   const fk=fechaKey(fechaActual);
   const est=ESTADO[obraIdx];
-  const nota=est.notas[fk]||'Sin nota registrada';
-  const fotos=(est.fotos[fk]||[]).filter(Boolean);
-  const presentes=est.personal.filter(p=>p.p);
-  const ausentes=est.personal.filter(p=>!p.p);
-  const [y,m,d]=fk.split('-');
-  const fd=new Date(parseInt(y),parseInt(m)-1,parseInt(d));
-  const fechaStr=DIAS_L[fd.getDay()]+' '+fd.getDate()+' de '+MESES_L[fd.getMonth()]+' de '+y;
+  const [yr,m,d]=fk.split('-');
+  const fd=new Date(parseInt(yr),parseInt(m)-1,parseInt(d));
+  const fechaStr=JOURS[fd.getDay()]+' '+fd.getDate()+' '+MOIS_L[fd.getMonth()]+' '+yr;
   try{
     const {jsPDF}=window.jspdf;
     const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-    const W=210;let y2=0;
-    doc.setFillColor(245,166,35);doc.rect(0,0,W,30,'F');
-    doc.setFontSize(16);doc.setTextColor(30,30,30);doc.setFont('helvetica','bold');
-    doc.text('REPORTE DIARIO DE OBRA',14,13);
-    doc.setFontSize(10);doc.setFont('helvetica','normal');
-    doc.text(obra.nombre,14,21);doc.text(fechaStr,14,28);
-    y2=38;
-    const sec=(t)=>{doc.setFillColor(30,30,30);doc.rect(14,y2,W-28,7,'F');doc.setFontSize(9);doc.setTextColor(245,166,35);doc.setFont('helvetica','bold');doc.text(t,17,y2+5);y2+=11;doc.setTextColor(30,30,30);doc.setFont('helvetica','normal');doc.setFontSize(10)};
-    const lin=(t,bold=false)=>{if(y2>270){doc.addPage();y2=20;}doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(10);doc.setTextColor(bold?30:100,bold?30:100,bold?30:100);const lines=doc.splitTextToSize(t,W-30);doc.text(lines,17,y2);y2+=lines.length*5+2};
-    sec('NOTA DEL DÍA');lin(nota);y2+=3;
-    sec('FOTOS REGISTRADAS ('+fotos.length+')');lin(fotos.length>0?fotos.map(f=>'📷 '+f).join('   '):'Sin fotos registradas');y2+=3;
-    sec('PERSONAL PRESENTE ('+presentes.length+'/'+est.personal.length+')');
-    presentes.forEach(p=>lin('✓  '+p.n+' — '+p.r));
-    if(ausentes.length>0){y2+=2;doc.setTextColor(180,60,30);doc.setFontSize(9);doc.text('Ausentes:',17,y2);y2+=5;ausentes.forEach(p=>{doc.text('✗  '+p.n+' — '+p.r,22,y2);y2+=5;});}
-    doc.setTextColor(30,30,30);y2+=3;
-    sec('MATERIALES Y PEDIDOS');
-    est.pedidos.length>0?est.pedidos.forEach(p=>lin('['+{ent:'ENTREGADO',urg:'URGENTE',transit:'EN TRÁNSITO'}[p.estado]+'] '+p.nombre+' — '+p.cantidad+' ('+p.proveedor+')')):lin('Sin pedidos activos');y2+=3;
-    sec('EQUIPOS EN OBRA');
-    est.equipos.length>0?est.equipos.forEach(e=>lin('['+{ok:'OK',warn:'EN USO',alert:'BAJA'}[e.estado]+'] '+e.nombre)):lin('Sin equipos registrados');
-    y2+=10;doc.setDrawColor(200,200,200);doc.line(14,y2,W-14,y2);y2+=6;
-    doc.setFontSize(8);doc.setTextColor(150,150,150);doc.text('Generado por Diario de Obra · '+new Date().toLocaleString('es-AR'),14,y2);
-    doc.save('Reporte_Obra_'+fk+'.pdf');
-  }catch(e){alert('Error generando PDF. Verificá la conexión e intentá de nuevo.');}
+    buildPDF(doc,obra,fk,est,fechaStr,true);
+    doc.save('Rapport_Chantier_'+fk+'.pdf');
+  }catch(e){alert('Erreur lors de la génération du PDF.');}
+}
+
+function exportarHistorialPDF(){
+  const est=ESTADO[obraIdx];
+  const obra=OBRAS[obraIdx];
+  const todasFechas=new Set([...Object.keys(est.notas),...Object.keys(est.fotos)].filter(k=>(est.notas[k]||(est.fotos[k]||[]).some(Boolean))));
+  if(todasFechas.size===0){alert("Aucun historique enregistré pour ce chantier.");return;}
+  const fechasOrdenadas=[...todasFechas].sort();
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=210;
+    // Portada
+    doc.setFillColor(245,166,35);doc.rect(0,0,W,297,'F');
+    doc.setFontSize(24);doc.setTextColor(26,26,26);doc.setFont('helvetica','bold');
+    doc.text('JOURNAL DE CHANTIER',W/2,100,{align:'center'});
+    doc.setFontSize(14);doc.setFont('helvetica','normal');
+    doc.text(obra.nombre,W/2,116,{align:'center'});
+    doc.setFontSize(11);doc.setTextColor(60,40,0);
+    const d0=fechasOrdenadas[0].split('-');const d1=fechasOrdenadas[fechasOrdenadas.length-1].split('-');
+    const fd0=new Date(d0[0],d0[1]-1,d0[2]);const fd1=new Date(d1[0],d1[1]-1,d1[2]);
+    doc.text(`Du ${fd0.getDate()} ${MOIS_L[fd0.getMonth()]} ${fd0.getFullYear()} au ${fd1.getDate()} ${MOIS_L[fd1.getMonth()]} ${fd1.getFullYear()}`,W/2,130,{align:'center'});
+    doc.setFontSize(10);doc.text(`${fechasOrdenadas.length} jour(s) enregistré(s)`,W/2,142,{align:'center'});
+
+    fechasOrdenadas.forEach((fk,idx)=>{
+      doc.addPage();
+      const [yr,m,d]=fk.split('-');
+      const fd=new Date(parseInt(yr),parseInt(m)-1,parseInt(d));
+      const fechaStr=JOURS[fd.getDay()]+' '+fd.getDate()+' '+MOIS_L[fd.getMonth()]+' '+yr;
+      buildPDF(doc,obra,fk,est,fechaStr,false);
+    });
+
+    doc.save('Historique_Chantier_'+obra.nombre.replace(/\s+/g,'_')+'.pdf');
+  }catch(e){alert('Erreur lors de la génération du PDF historique.');}
 }
 
 // ── MODALES ───────────────────────────────────────────────
@@ -550,17 +772,10 @@ actualizarFecha();
 renderTabActual();
 fetchClima();
 
-// ── SERVICE WORKER ────────────────────────────────────────
 if('serviceWorker' in navigator){
-  const swCode=`
-    const CACHE='obra-v1';
-    const ASSETS=['./','/obra-diario/'];
-    self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
-    self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
-  `;
+  const swCode=`const CACHE='chantier-v2';self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
   const blob=new Blob([swCode],{type:'application/javascript'});
-  const swUrl=URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(()=>{});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
 }
 </script>
 </body>
