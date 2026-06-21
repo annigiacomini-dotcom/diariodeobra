@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Journal de Chantier</title>
+<link rel="manifest" href="data:application/json;charset=utf-8,{%22name%22:%22Journal%20de%20Chantier%22,%22short_name%22:%22Chantier%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%23F5A623%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20192%20192'%3E%3Crect%20width='192'%20height='192'%20rx='32'%20fill='%23F5A623'/%3E%3Ctext%20y='140'%20x='30'%20font-size='130'%20font-family='sans-serif'%3E%F0%9F%9A%A7%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22}]}">
+<meta name="theme-color" content="#F5A623">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Chantier">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f0f0f0;display:flex;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.app{width:100%;max-width:480px;background:#fff;min-height:100vh;box-shadow:0 0 24px rgba(0,0,0,0.08)}
+.header{background:#F5A623;padding:10px 14px 10px}
+.obra-selector{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.obra-selector select{background:rgba(0,0,0,0.12);border:none;color:#1a1a1a;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;outline:none;-webkit-appearance:none;flex:1;padding:4px 8px;border-radius:6px}
+.obra-selector select option{background:#fff;color:#222}
+.header-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.fecha-nav{display:flex;align-items:center;gap:6px;flex:1}
+.fecha-btn{background:rgba(0,0,0,0.12);border:none;color:#1a1a1a;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.fecha-lbl{font-size:12px;color:#2a1a00;font-weight:600;flex:1}
+.clima-mini{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.12);border-radius:8px;padding:5px 10px;flex-shrink:0}
+.clima-mini .temp{font-size:18px;font-weight:700;color:#1a1a1a;line-height:1}
+.clima-mini .det{font-size:10px;color:#2a1a00;line-height:1.3}
+.nav{display:flex;background:#fff;border-bottom:1.5px solid #eee;position:sticky;top:0;z-index:10}
+.nb{flex:1;padding:9px 2px 7px;text-align:center;cursor:pointer;border:none;background:transparent;color:#aaa;font-size:9px;font-family:inherit;border-bottom:2px solid transparent;transition:color .15s}
+.nb i{display:block;font-size:20px;margin-bottom:1px}
+.nb.active{color:#F5A623;border-bottom-color:#F5A623}
+.content{background:#f7f7f7;min-height:calc(100vh - 130px);padding:12px}
+.tab{display:none}.tab.vis{display:block}
+.stitle{color:#F5A623;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.card{background:#fff;border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #eee;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.clbl{font-size:10px;color:#999;margin-bottom:3px}
+.cval{font-size:14px;color:#1a1a1a;font-weight:600}
+.csub{font-size:11px;color:#999;margin-top:2px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.bok{background:#e8f5e9;color:#2e7d32}
+.bwn{background:#fff8e1;color:#f57f17}
+.bal{background:#fce4ec;color:#c62828}
+.btn-primary{display:flex;align-items:center;justify-content:center;gap:6px;background:#F5A623;color:#1a1a1a;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;font-family:inherit;box-shadow:0 2px 8px rgba(245,166,35,0.25)}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-sec{display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;color:#555;border:1px solid #ddd;border-radius:10px;padding:10px;font-size:12px;cursor:pointer;width:100%;margin-bottom:8px;font-family:inherit}
+.li-item{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.li-item:last-child{border-bottom:none}
+.av{width:36px;height:36px;border-radius:50%;background:#FFF3E0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#F5A623;flex-shrink:0;border:1.5px solid #FFE0B2}
+.li-name{font-size:13px;color:#1a1a1a;font-weight:500}
+.li-rol{font-size:10px;color:#999}
+.chk{margin-left:auto;width:30px;height:30px;border-radius:50%;border:1.5px solid #ddd;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;transition:all .2s;background:#fff}
+.chk.pres{background:#e8f5e9;border-color:#81c784;color:#2e7d32}
+.chk.abs{background:#fce4ec;border-color:#ef9a9a;color:#c62828}
+.foto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.fslot{aspect-ratio:1;background:#f5f5f5;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px dashed #ddd;cursor:pointer;position:relative;overflow:hidden;transition:all .2s}
+.fslot:active{transform:scale(.96)}
+.fslot.ok{border:none;background:#000}
+.fslot img{width:100%;height:100%;object-fit:cover;border-radius:9px}
+.fhora{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;font-size:8px;padding:2px 5px;border-radius:4px}
+.fslot .ficon{font-size:22px;color:#ccc}
+.fslot .flbl{font-size:9px;color:#ccc;margin-top:3px}
+input[type=file]{display:none}
+.ped-item{padding:11px;background:#fff;border-radius:10px;margin-bottom:8px;border-left:3px solid #F5A623;border-top:1px solid #eee;border-right:1px solid #eee;border-bottom:1px solid #eee}
+.ped-item.ent{border-left-color:#43a047;opacity:.75}
+.ped-item.urg{border-left-color:#e53935}
+.ped-item.anu{border-left-color:#bbb;opacity:.45}
+.ped-name{font-size:13px;color:#1a1a1a;font-weight:600;margin-bottom:3px}
+.ped-det{font-size:11px;color:#999;display:flex;justify-content:space-between;align-items:center;margin-top:3px}
+.ped-actions{display:flex;gap:6px;margin-top:8px}
+.ped-btn{flex:1;padding:6px;border-radius:6px;border:1px solid #eee;background:#f9f9f9;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;color:#555}
+.ped-btn.recibido{border-color:#c8e6c9;background:#e8f5e9;color:#2e7d32}
+.ped-btn.anular{border-color:#ffcdd2;background:#fce4ec;color:#c62828}
+.ped-foto-preview{width:100%;margin-top:8px;border-radius:6px;object-fit:cover;max-height:120px;cursor:pointer}
+.eq-item{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid #f0f0f0}
+.eq-item:last-child{border-bottom:none}
+.eq-icon{width:38px;height:38px;background:#FFF3E0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#F5A623;flex-shrink:0}
+/* MÉTÉO */
+.hora-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
+.hora-row::-webkit-scrollbar{display:none}
+.hslot{flex-shrink:0;background:#fff;border-radius:8px;padding:8px 10px;text-align:center;border:1px solid #eee;min-width:52px}
+.hslot.now{border-color:#F5A623;background:#FFF8E1}
+.hslot .ht{font-size:10px;color:#999}
+.hslot .hv{font-size:13px;font-weight:700;color:#1a1a1a;margin:3px 0}
+.hslot i{font-size:14px;color:#aaa}
+.hslot.now i{color:#F5A623}
+.tab-clima-cards{display:flex;gap:8px;margin-bottom:10px}
+.tcc{flex:1;background:#fff;border-radius:10px;padding:10px;text-align:center;border:1px solid #eee}
+.tcc i{font-size:24px;color:#F5A623;display:block;margin-bottom:3px}
+.tcc .v{font-size:16px;font-weight:700;color:#1a1a1a}
+.tcc .l{font-size:10px;color:#999;margin-top:1px}
+.loading-clima{color:#aaa;font-size:12px;text-align:center;padding:30px;display:flex;flex-direction:column;align-items:center;gap:8px}
+/* RÉSUMÉ JOUR MÉTÉO */
+.clima-resumen{background:#FFF8E1;border:1px solid #FFE082;border-radius:10px;padding:12px;margin-bottom:10px}
+.clima-resumen-title{font-size:10px;font-weight:700;color:#F57F17;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.clima-resumen-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.clima-stat{text-align:center}
+.clima-stat .cv{font-size:16px;font-weight:700;color:#1a1a1a}
+.clima-stat .cl{font-size:9px;color:#999;margin-top:1px}
+.pres-sum{display:flex;gap:8px;margin-bottom:10px}
+.ps-card{flex:1;background:#fff;border-radius:10px;padding:10px;text-align:center;border:1px solid #eee}
+.ps-num{font-size:24px;font-weight:700;color:#1a1a1a}
+.ps-lbl{font-size:9px;color:#999;margin-top:1px}
+.ps-card.ok .ps-num{color:#2e7d32}
+.ps-card.aus .ps-num{color:#c62828}
+.hist-day{background:#fff;border-radius:10px;padding:11px;margin-bottom:7px;border:1px solid #eee;cursor:pointer}
+.hist-fecha{font-size:11px;color:#F5A623;font-weight:700}
+.hist-nota{font-size:11px;color:#999;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-stats{display:flex;gap:10px;margin-top:5px}
+.hist-stat{font-size:10px;color:#bbb;display:flex;align-items:center;gap:3px}
+.inp{background:#fff;border:1px solid #ddd;border-radius:8px;padding:9px 11px;color:#1a1a1a;font-size:13px;font-family:inherit;width:100%;margin-bottom:7px;outline:none}
+.inp:focus{border-color:#F5A623}
+.inp::placeholder{color:#bbb}
+.modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:100;align-items:flex-end;justify-content:center}
+.modal-bg.vis{display:flex}
+.modal{background:#fff;border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:480px;border-top:1px solid #eee;max-height:85vh;overflow-y:auto}
+.modal h3{color:#1a1a1a;font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.modal-close{float:right;background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;line-height:1;padding:0}
+.modal-handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px}
+.trash-btn{background:none;border:none;color:#ccc;cursor:pointer;padding:4px 6px;font-size:15px;flex-shrink:0}
+.sep{height:1px;background:#eee;margin:12px 0}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+  <div class="obra-selector">
+    <i class="ti ti-building" style="font-size:16px;color:#1a1a1a"></i>
+    <select id="obraSelect" onchange="cambiarObra()">
+      <option value="0">Chantier Principal — Thionck Essyl</option>
+      <option value="1">Chantier Nord</option>
+      <option value="2">Local Commercial</option>
+    </select>
+    <i class="ti ti-chevron-down" style="font-size:14px;color:#1a1a1a"></i>
+  </div>
+  <div class="header-row">
+    <div class="fecha-nav">
+      <button class="fecha-btn" onclick="navFecha(-1)"><i class="ti ti-chevron-left"></i></button>
+      <span class="fecha-lbl" id="fechaLbl"></span>
+      <button class="fecha-btn" onclick="navFecha(1)"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div class="clima-mini">
+      <i class="ti ti-sun" style="font-size:22px;color:#1a1a1a"></i>
+      <div><div class="temp" id="miniTemp">--°</div><div class="det" id="miniDet">chargement...</div></div>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nb active" onclick="tab('clima',this)"><i class="ti ti-cloud-sun"></i>Météo</button>
+  <button class="nb" onclick="tab('diario',this)"><i class="ti ti-camera"></i>Journal</button>
+  <button class="nb" onclick="tab('materiales',this)"><i class="ti ti-package"></i>Matériaux</button>
+  <button class="nb" onclick="tab('personal',this)"><i class="ti ti-users"></i>Personnel</button>
+  <button class="nb" onclick="tab('equipos',this)"><i class="ti ti-crane"></i>Engins</button>
+</nav>
+
+<div class="content">
+
+  <div id="tab-clima" class="tab vis">
+    <div id="climaContent"><div class="loading-clima"><i class="ti ti-loader" style="font-size:28px;color:#F5A623"></i>Chargement météo...</div></div>
+  </div>
+
+  <div id="tab-diario" class="tab">
+    <p class="stitle"><i class="ti ti-camera"></i>Photos du jour</p>
+    <div class="foto-grid" id="fotoGrid"></div>
+    <input type="file" id="fileInput" accept="image/*" onchange="onFotoSelected(event)">
+    <p class="stitle"><i class="ti ti-notes"></i>Note du jour</p>
+    <textarea class="inp" id="notaTexto" rows="3" placeholder="Avancement, incidents, observations..."></textarea>
+    <button class="btn-primary" onclick="guardarNota()"><i class="ti ti-device-floppy"></i>Enregistrer la note</button>
+    <button class="btn-sec" onclick="exportarPDF()"><i class="ti ti-file-type-pdf"></i>Rapport du jour (PDF)</button>
+    <button class="btn-sec" onclick="exportarHistorialPDF()"><i class="ti ti-file-export"></i>Exporter tout l'historique (PDF)</button>
+    <div class="sep"></div>
+    <p class="stitle"><i class="ti ti-history"></i>Historique</p>
+    <div id="historialLista"></div>
+  </div>
+
+  <div id="tab-materiales" class="tab">
+    <button class="btn-primary" onclick="abrirModal('modalPedido')"><i class="ti ti-plus"></i>Nouvelle commande</button>
+    <p class="stitle"><i class="ti ti-package"></i>Commandes en cours</p>
+    <div id="pedidosLista"></div>
+    <div class="sep"></div>
+    <p class="stitle"><i class="ti ti-alert-triangle"></i>Stock critique</p>
+    <div class="g2">
+      <div class="card"><div class="clbl">Sable grossier</div><div class="cval">1.2 m³</div><div class="csub"><span class="bdg bal">Stock bas</span></div></div>
+      <div class="card"><div class="clbl">Coffrage bois</div><div class="cval">45 planches</div><div class="csub"><span class="bdg bok">OK</span></div></div>
+    </div>
+  </div>
+
+  <div id="tab-personal" class="tab">
+    <div class="pres-sum">
+      <div class="ps-card ok"><div class="ps-num" id="cntPres">0</div><div class="ps-lbl">Présents</div></div>
+      <div class="ps-card aus"><div class="ps-num" id="cntAus">0</div><div class="ps-lbl">Absents</div></div>
+      <div class="ps-card"><div class="ps-num" id="cntTot">0</div><div class="ps-lbl">Total</div></div>
+    </div>
+    <button class="btn-primary" onclick="abrirModal('modalPersona')"><i class="ti ti-user-plus"></i>Ajouter une personne</button>
+    <p class="stitle"><i class="ti ti-users"></i>Liste du personnel</p>
+    <div class="card" id="personalLista"></div>
+  </div>
+
+  <div id="tab-equipos" class="tab">
+    <button class="btn-primary" onclick="abrirModal('modalEquipo')"><i class="ti ti-plus"></i>Ajouter un engin</button>
+    <p class="stitle"><i class="ti ti-crane"></i>Engins sur chantier</p>
+    <div class="card" id="equiposLista"></div>
+  </div>
+
+</div>
+</div>
+
+<div class="modal-bg" id="modalPedido">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="cerrarModal('modalPedido')">×</button>
+    <h3><i class="ti ti-package" style="color:#F5A623"></i>Nouvelle commande</h3>
+    <input class="inp" id="mpNombre" placeholder="Matériau / produit">
+    <input class="inp" id="mpCantidad" placeholder="Quantité (ex: 2 tonnes, 80 sacs)">
+    <input class="inp" id="mpProveedor" placeholder="Fournisseur">
+    <select class="inp" id="mpEstado">
+      <option value="urg">Urgent</option>
+      <option value="transit">En transit</option>
+      <option value="ent">Livré</option>
+    </select>
+    <button class="btn-primary" onclick="agregarPedido()"><i class="ti ti-check"></i>Enregistrer</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalPersona">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="cerrarModal('modalPersona')">×</button>
+    <h3><i class="ti ti-user-plus" style="color:#F5A623"></i>Ajouter au personnel</h3>
+    <input class="inp" id="mpNombreP" placeholder="Nom complet">
+    <input class="inp" id="mpRol" placeholder="Rôle (Maçon, Chef, etc.)">
+    <button class="btn-primary" onclick="agregarPersona()"><i class="ti ti-check"></i>Ajouter</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalEquipo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="cerrarModal('modalEquipo')">×</button>
+    <h3><i class="ti ti-crane" style="color:#F5A623"></i>Ajouter un engin</h3>
+    <input class="inp" id="meNombre" placeholder="Nom de l'engin">
+    <select class="inp" id="meEstado">
+      <option value="ok">Opérationnel</option>
+      <option value="warn">En service</option>
+      <option value="alert">En panne / Réparation</option>
+    </select>
+    <button class="btn-primary" onclick="agregarEquipo()"><i class="ti ti-check"></i>Ajouter</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalHist">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="cerrarModal('modalHist')">×</button>
+    <h3 id="modalHistFecha" style="color:#F5A623"></h3>
+    <div id="modalHistContenido"></div>
+  </div>
+</div>
+
+<script>
+const OBRAS=[
+  {nombre:"Chantier Principal — Thionck Essyl",lat:12.7599,lon:-16.0797},
+  {nombre:"Chantier Nord",lat:12.780,lon:-16.060},
+  {nombre:"Local Commercial",lat:12.750,lon:-16.090}
+];
+const JOURS=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+const JOURS_C=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+const MOIS=["jan","fév","mar","avr","mai","juin","juil","août","sep","oct","nov","déc"];
+const MOIS_L=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+
+let obraIdx=0;
+let fechaActual=new Date(); fechaActual.setHours(0,0,0,0);
+const hoy=new Date(); hoy.setHours(0,0,0,0);
+let currentTabId='clima';
+let climaCache={};
+let fotoSlotIdx=null;
+let lastClimaData=null;
+let pedidoFotoIdx=null;
+
+let ESTADO={
+  0:{
+    personal:[
+      {n:"Mamadou Diallo",r:"Maçon",i:"MD",p:true},
+      {n:"Ibrahima Sow",r:"Chef d'équipe",i:"IS",p:true},
+      {n:"Ousmane Ndiaye",r:"Charpentier",i:"ON",p:true},
+      {n:"Fatou Diop",r:"Technicienne",i:"FD",p:false},
+      {n:"Cheikh Bâ",r:"Maçon",i:"CB",p:true},
+      {n:"Lamine Fall",r:"Aide",i:"LF",p:true}
+    ],
+    pedidos:[
+      {nombre:"Fer à béton Ø12",cantidad:"2.5 tonnes",proveedor:"Aciers du Nord",estado:"urg",foto:null},
+      {nombre:"Ciment Portland",cantidad:"80 sacs",proveedor:"Lafarge",estado:"transit",foto:null},
+      {nombre:"Briques céramiques",cantidad:"1200 u",proveedor:"Briqueterie Sud",estado:"ent",foto:null}
+    ],
+    equipos:[
+      {nombre:"Bétonnière",estado:"ok"},
+      {nombre:"Échafaudage tubulaire",estado:"warn"},
+      {nombre:"Compresseur 200L",estado:"ok"},
+      {nombre:"Vibrateur à béton",estado:"alert"},
+      {nombre:"Grue à tour",estado:"ok"}
+    ],
+    fotos:{},notas:{}
+  },
+  1:{
+    personal:[{n:"Aliou Camara",r:"Chef de chantier",i:"AC",p:true},{n:"Serigne Mbaye",r:"Maçon",i:"SM",p:false}],
+    pedidos:[{nombre:"Blocs de béton",cantidad:"500 u",proveedor:"Béton Plus",estado:"transit",foto:null}],
+    equipos:[{nombre:"Petite bétonnière",estado:"ok"}],
+    fotos:{},notas:{}
+  },
+  2:{
+    personal:[{n:"Moussa Diallo",r:"Électricien",i:"MD",p:true}],
+    pedidos:[],equipos:[{nombre:"Échelle aluminium",estado:"ok"}],
+    fotos:{},notas:{}
+  }
+};
+
+function fechaKey(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function fmtFecha(d){
+  const esHoy=d.getTime()===hoy.getTime();
+  const esAyer=d.getTime()===hoy.getTime()-86400000;
+  if(esHoy)return"Aujourd'hui · "+JOURS[d.getDay()]+' '+d.getDate()+' '+MOIS[d.getMonth()];
+  if(esAyer)return'Hier · '+d.getDate()+' '+MOIS[d.getMonth()];
+  return JOURS[d.getDay()]+' '+d.getDate()+' '+MOIS_L[d.getMonth()];
+}
+function actualizarFecha(){document.getElementById('fechaLbl').textContent=fmtFecha(fechaActual)}
+function navFecha(dir){
+  const nf=new Date(fechaActual);nf.setDate(nf.getDate()+dir);
+  if(nf>hoy)return;
+  fechaActual=nf;actualizarFecha();renderTabActual();
+}
+function tab(id,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('vis'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('vis');
+  btn.classList.add('active');
+  currentTabId=id;renderTabActual();
+}
+function renderTabActual(){
+  if(currentTabId==='clima')renderClima();
+  else if(currentTabId==='diario')renderDiario();
+  else if(currentTabId==='materiales')renderMateriales();
+  else if(currentTabId==='personal')renderPersonal();
+  else if(currentTabId==='equipos')renderEquipos();
+}
+function cambiarObra(){obraIdx=parseInt(document.getElementById('obraSelect').value);climaCache={};lastClimaData=null;fetchClima();renderTabActual()}
+
+// ── MÉTÉO ─────────────────────────────────────────────────
+function wmoIcon(c){if(c===0)return'ti-sun';if(c<=2)return'ti-cloud-sun';if(c<=3)return'ti-cloud';if(c<=49)return'ti-cloud-fog';if(c<=67)return'ti-cloud-rain';if(c<=77)return'ti-snowflake';return'ti-cloud-storm'}
+function wmoDesc(c){if(c===0)return'Ensoleillé';if(c<=2)return'Peu nuageux';if(c<=3)return'Nuageux';if(c<=49)return'Brouillard';if(c<=67)return'Pluie';if(c<=77)return'Neige';return'Orage'}
+
+async function fetchClima(){
+  const obra=OBRAS[obraIdx];
+  const key=obraIdx+'_'+fechaKey(fechaActual);
+  document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-loader" style="font-size:28px;color:#F5A623"></i>Chargement météo...</div>';
+  document.getElementById('miniTemp').textContent='--°';
+  document.getElementById('miniDet').textContent='chargement...';
+  if(climaCache[key]){renderClimaData(climaCache[key]);return}
+  try{
+    // Fetch both current + daily summary (min/max/rain total)
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${obra.lat}&longitude=${obra.lon}&hourly=temperature_2m,precipitation_probability,weathercode,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,windspeed_10m_max&current_weather=true&timezone=auto&forecast_days=1`;
+    const r=await fetch(url);
+    const d=await r.json();
+    climaCache[key]=d;lastClimaData=d;renderClimaData(d);
+  }catch(e){
+    document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-wifi-off" style="font-size:28px;color:#ccc"></i>Pas de connexion</div>';
+  }
+}
+
+function renderClimaData(d){
+  lastClimaData=d;
+  const cw=d.current_weather;
+  const temp=Math.round(cw.temperature);
+  const wind=Math.round(cw.windspeed);
+  const desc=wmoDesc(cw.weathercode);
+
+  // Daily summary (more accurate averages)
+  const daily=d.daily;
+  const tMax=daily?Math.round(daily.temperature_2m_max[0]):'--';
+  const tMin=daily?Math.round(daily.temperature_2m_min[0]):'--';
+  const tMoy=daily?Math.round((daily.temperature_2m_max[0]+daily.temperature_2m_min[0])/2):'--';
+  const pluvioMax=daily?Math.round(daily.precipitation_probability_max[0]):'--';
+  const pluvioMm=daily?Math.round(daily.precipitation_sum[0]*10)/10:'--';
+  const ventMax=daily?Math.round(daily.windspeed_10m_max[0]):'--';
+
+  // Hourly slots every 2h
+  const nowH=new Date().getHours();
+  const hours=d.hourly.time.map((t,i)=>({
+    hora:t.split('T')[1].slice(0,5),
+    h:parseInt(t.split('T')[1]),
+    temp:Math.round(d.hourly.temperature_2m[i]),
+    lluvia:d.hourly.precipitation_probability[i]||0,
+    wc:d.hourly.weathercode[i]
+  })).filter((_,i)=>i%2===0);
+
+  const nowIdx=hours.findIndex(h=>h.h>=nowH);
+  const maxLluvia=pluvioMax;
+  const alerta=maxLluvia>70
+    ?`<span class="bdg bal">⚠ Pluie probable ${maxLluvia}% — max ${pluvioMm}mm</span>`
+    :`<span class="bdg bok">✓ Conditions favorables pour le travail</span>`;
+
+  document.getElementById('miniTemp').textContent=temp+'°';
+  document.getElementById('miniDet').textContent=desc;
+
+  document.getElementById('climaContent').innerHTML=`
+    <p class="stitle"><i class="ti ti-cloud-sun"></i>Résumé du jour — Thionck Essyl</p>
+    <div class="clima-resumen">
+      <div class="clima-resumen-title">Températures du jour</div>
+      <div class="clima-resumen-row">
+        <div class="clima-stat"><div class="cv">${tMin}°</div><div class="cl">Min</div></div>
+        <div class="clima-stat"><div class="cv" style="color:#F5A623">${tMoy}°</div><div class="cl">Moyenne</div></div>
+        <div class="clima-stat"><div class="cv">${tMax}°</div><div class="cl">Max</div></div>
+      </div>
+    </div>
+    <div class="tab-clima-cards">
+      <div class="tcc"><i class="ti ti-droplet"></i><div class="v">${pluvioMax}%</div><div class="l">Prob. pluie</div></div>
+      <div class="tcc"><i class="ti ti-cloud-rain"></i><div class="v">${pluvioMm} mm</div><div class="l">Précip. totale</div></div>
+      <div class="tcc"><i class="ti ti-wind"></i><div class="v">${ventMax} km/h</div><div class="l">Vent max</div></div>
+    </div>
+    <p class="stitle"><i class="ti ti-clock"></i>Température heure par heure</p>
+    <div class="hora-row">${hours.map((h,i)=>`
+      <div class="hslot${i===nowIdx?' now':''}">
+        <div class="ht">${h.hora}</div>
+        <div class="hv">${h.temp}°</div>
+        <i class="ti ${wmoIcon(h.wc)}"></i>
+        <div style="font-size:9px;color:${h.lluvia>50?'#e53935':'#bbb'};margin-top:2px">${h.lluvia}%</div>
+      </div>`).join('')}</div>
+    <div class="card"><div class="clbl">Conditions de travail</div><div style="margin-top:6px">${alerta}</div><div class="csub" style="margin-top:5px">${maxLluvia>70?'Évaluer la suspension des travaux en hauteur ou du bétonnage.':'Température et vent dans les plages normales de travail.'}</div></div>`;
+}
+function renderClima(){fetchClima()}
+
+// ── JOURNAL ───────────────────────────────────────────────
+function renderDiario(){
+  const fk=fechaKey(fechaActual);
+  const est=ESTADO[obraIdx];
+  if(!est.fotos[fk])est.fotos[fk]=Array(6).fill(null);
+  document.getElementById('notaTexto').value=est.notas[fk]||'';
+  document.getElementById('fotoGrid').innerHTML=est.fotos[fk].map((f,i)=>{
+    if(f)return`<div class="fslot ok" onclick="eliminarFoto(${i})"><img src="${f.src}" alt="Photo ${i+1}"><span class="fhora">${f.hora}</span></div>`;
+    return`<div class="fslot" onclick="abrirCamara(${i})"><i class="ti ti-camera ficon"></i><div class="flbl">Photo ${i+1}</div></div>`;
+  }).join('');
+  const hist=Object.entries(est.notas).filter(([k])=>k!==fk).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,5);
+  document.getElementById('historialLista').innerHTML=hist.length===0
+    ?'<div style="color:#bbb;font-size:12px;padding:8px 0">Aucun enregistrement précédent</div>'
+    :hist.map(([k,n])=>{
+      const [y,m,d]=k.split('-');const fd=new Date(y,m-1,d);
+      const fCnt=(est.fotos[k]||[]).filter(Boolean).length;
+      return`<div class="hist-day" onclick="verHistorial('${k}')">
+        <div class="hist-fecha">${JOURS_C[fd.getDay()]} ${fd.getDate()} ${MOIS[fd.getMonth()]} ${y}</div>
+        <div class="hist-nota">${n||'Sans note'}</div>
+        <div class="hist-stats"><span class="hist-stat"><i class="ti ti-camera" style="font-size:11px"></i>${fCnt} photo(s)</span></div>
+      </div>`;}).join('');
+}
+
+function abrirCamara(idx){
+  fotoSlotIdx=idx;
+  const fi=document.getElementById('fileInput');
+  fi.onchange=onFotoSelected;
+  fi.click();
+}
+
+function onFotoSelected(e){
+  const file=e.target.files[0];
+  if(!file||fotoSlotIdx===null)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const fk=fechaKey(fechaActual);
+    if(!ESTADO[obraIdx].fotos[fk])ESTADO[obraIdx].fotos[fk]=Array(6).fill(null);
+    const now=new Date();
+    ESTADO[obraIdx].fotos[fk][fotoSlotIdx]={
+      src:ev.target.result,
+      hora:String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')
+    };
+    fotoSlotIdx=null;
+    e.target.value='';
+    renderDiario();
+  };
+  reader.readAsDataURL(file);
+}
+
+function eliminarFoto(i){
+  if(confirm('Supprimer cette photo ?')){
+    ESTADO[obraIdx].fotos[fechaKey(fechaActual)][i]=null;
+    renderDiario();
+  }
+}
+
+function guardarNota(){
+  const txt=document.getElementById('notaTexto').value.trim();
+  if(!txt)return;
+  ESTADO[obraIdx].notas[fechaKey(fechaActual)]=txt;
+  renderDiario();
+  alert('Note enregistrée');
+}
+
+function verHistorial(k){
+  const est=ESTADO[obraIdx];
+  const [y,m,d]=k.split('-');const fd=new Date(y,m-1,d);
+  const fotos=(est.fotos[k]||[]).filter(Boolean);
+  document.getElementById('modalHistFecha').textContent=JOURS[fd.getDay()]+' '+fd.getDate()+' '+MOIS_L[fd.getMonth()]+' '+y;
+  document.getElementById('modalHistContenido').innerHTML=`
+    <div style="margin-bottom:12px"><div class="clbl">Note</div><div style="font-size:13px;color:#333;margin-top:4px">${est.notas[k]||'Sans note'}</div></div>
+    <div class="clbl" style="margin-bottom:6px">Photos (${fotos.length})</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+      ${fotos.map(f=>`<img src="${f.src}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px">`).join('')}
+    </div>`;
+  abrirModal('modalHist');
+}
+
+// ── MATÉRIAUX ─────────────────────────────────────────────
+function renderMateriales(){
+  const peds=ESTADO[obraIdx].pedidos;
+  if(!peds.length){document.getElementById('pedidosLista').innerHTML='<div style="color:#bbb;font-size:12px;padding:8px 0">Aucune commande active</div>';return;}
+  document.getElementById('pedidosLista').innerHTML=peds.map((p,i)=>{
+    const cls={enu:'anu',ent:'ent',urg:'urg',transit:''}[p.estado]||'';
+    const estLabel={urg:'Urgent',transit:'En transit',ent:'Livré',enu:'Annulé'}[p.estado]||'';
+    const estBdg={urg:'bal',transit:'bwn',ent:'bok',enu:''}[p.estado]||'';
+    const fotoHtml=p.foto?`<img src="${p.foto}" class="ped-foto-preview" onclick="verFotoPedido(${i})" alt="Photo commande">`:'';
+    const actions=p.estado!=='enu'?`
+      <div class="ped-actions">
+        ${p.estado!=='ent'?`<button class="ped-btn recibido" onclick="marcarPedido(${i},'ent')"><i class="ti ti-check"></i>Reçu</button>`:''}
+        <button class="ped-btn" onclick="pedidoFoto(${i})"><i class="ti ti-camera"></i>Photo</button>
+        <button class="ped-btn anular" onclick="marcarPedido(${i},'enu')"><i class="ti ti-x"></i>Annuler</button>
+      </div>`:'';
+    return`<div class="ped-item ${cls}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="ped-name">${p.nombre}</div>
+        ${estLabel?`<span class="bdg ${estBdg}">${estLabel}</span>`:''}
+      </div>
+      <div class="ped-det"><span>${p.proveedor}</span><span>${p.cantidad}</span></div>
+      ${fotoHtml}${actions}
+    </div>`;
+  }).join('');
+}
+
+function pedidoFoto(i){
+  pedidoFotoIdx=i;
+  fotoSlotIdx=null;
+  const fi=document.getElementById('fileInput');
+  fi.onchange=function(e){
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      ESTADO[obraIdx].pedidos[pedidoFotoIdx].foto=ev.target.result;
+      fi.onchange=onFotoSelected;e.target.value='';renderMateriales();
+    };
+    reader.readAsDataURL(file);
+  };
+  fi.click();
+}
+
+function verFotoPedido(i){
+  const f=ESTADO[obraIdx].pedidos[i].foto;
+  if(f){
+    document.getElementById('modalHistFecha').textContent='Photo de livraison';
+    document.getElementById('modalHistContenido').innerHTML=`<img src="${f}" style="width:100%;border-radius:8px">`;
+    abrirModal('modalHist');
+  }
+}
+
+function marcarPedido(i,estado){ESTADO[obraIdx].pedidos[i].estado=estado;renderMateriales()}
+
+function agregarPedido(){
+  const n=document.getElementById('mpNombre').value.trim();if(!n)return;
+  ESTADO[obraIdx].pedidos.unshift({nombre:n,cantidad:document.getElementById('mpCantidad').value.trim()||'—',proveedor:document.getElementById('mpProveedor').value.trim()||'—',estado:document.getElementById('mpEstado').value,foto:null});
+  cerrarModal('modalPedido');
+  ['mpNombre','mpCantidad','mpProveedor'].forEach(id=>document.getElementById(id).value='');
+  renderMateriales();
+}
+
+// ── PERSONNEL ─────────────────────────────────────────────
+function renderPersonal(){
+  const pers=ESTADO[obraIdx].personal;
+  const pres=pers.filter(p=>p.p).length;
+  document.getElementById('cntPres').textContent=pres;
+  document.getElementById('cntAus').textContent=pers.length-pres;
+  document.getElementById('cntTot').textContent=pers.length;
+  document.getElementById('personalLista').innerHTML=pers.map((p,i)=>`
+    <div class="li-item">
+      <div class="av">${p.i}</div>
+      <div style="flex:1"><div class="li-name">${p.n}</div><div class="li-rol">${p.r}</div></div>
+      <div class="chk ${p.p?'pres':'abs'}" onclick="togglePres(${i})">
+        <i class="ti ${p.p?'ti-check':'ti-x'}" style="font-size:14px"></i>
+      </div>
+      <button class="trash-btn" onclick="eliminarPersona(${i})"><i class="ti ti-trash"></i></button>
+    </div>`).join('')||'<div style="color:#bbb;font-size:12px;padding:8px 0">Aucun personnel enregistré</div>';
+}
+function togglePres(i){ESTADO[obraIdx].personal[i].p=!ESTADO[obraIdx].personal[i].p;renderPersonal()}
+function agregarPersona(){
+  const n=document.getElementById('mpNombreP').value.trim();if(!n)return;
+  const ini=n.split(' ').slice(0,2).map(x=>x[0].toUpperCase()).join('');
+  ESTADO[obraIdx].personal.push({n,r:document.getElementById('mpRol').value.trim()||'Sans rôle',i:ini,p:true});
+  cerrarModal('modalPersona');
+  document.getElementById('mpNombreP').value='';document.getElementById('mpRol').value='';
+  renderPersonal();
+}
+function eliminarPersona(i){if(confirm('Supprimer cette personne ?')){ESTADO[obraIdx].personal.splice(i,1);renderPersonal();}}
+
+// ── ENGINS ────────────────────────────────────────────────
+const EQ_ICONS={'Bétonnière':'ti-truck','Échafaudage tubulaire':'ti-ladder','Compresseur 200L':'ti-engine','Vibrateur à béton':'ti-tool','Grue à tour':'ti-crane','Petite bétonnière':'ti-truck','Échelle aluminium':'ti-ladder'};
+function renderEquipos(){
+  const eqs=ESTADO[obraIdx].equipos;
+  document.getElementById('equiposLista').innerHTML=eqs.length===0
+    ?'<div style="color:#bbb;font-size:12px;padding:8px 0">Aucun engin enregistré</div>'
+    :eqs.map((e,i)=>`<div class="eq-item">
+      <div class="eq-icon"><i class="ti ${EQ_ICONS[e.nombre]||'ti-tool'}"></i></div>
+      <div style="flex:1"><div style="font-size:13px;color:#1a1a1a;font-weight:500">${e.nombre}</div>
+      <div style="font-size:10px;color:#999">${{ok:'Opérationnel',warn:'En service',alert:'En panne / Réparation'}[e.estado]}</div></div>
+      <span class="bdg ${{ok:'bok',warn:'bwn',alert:'bal'}[e.estado]}">${{ok:'OK',warn:'En service',alert:'Panne'}[e.estado]}</span>
+      <button class="trash-btn" onclick="eliminarEquipo(${i})"><i class="ti ti-trash"></i></button>
+    </div>`).join('');
+}
+function agregarEquipo(){
+  const n=document.getElementById('meNombre').value.trim();if(!n)return;
+  ESTADO[obraIdx].equipos.push({nombre:n,estado:document.getElementById('meEstado').value});
+  cerrarModal('modalEquipo');document.getElementById('meNombre').value='';
+  renderEquipos();
+}
+function eliminarEquipo(i){if(confirm('Supprimer cet engin ?')){ESTADO[obraIdx].equipos.splice(i,1);renderEquipos();}}
+
+// ── PDF ENGINE ────────────────────────────────────────────
+function getClimaInfo(){
+  if(!lastClimaData)return{temp:'N/D',tMin:'--',tMax:'--',tMoy:'--',lluvia:'N/D',mm:'--',viento:'N/D',desc:'Non disponible'};
+  const cw=lastClimaData.current_weather;
+  const daily=lastClimaData.daily;
+  return{
+    temp:Math.round(cw.temperature)+'°C',
+    tMin:daily?Math.round(daily.temperature_2m_min[0])+'°C':'--',
+    tMax:daily?Math.round(daily.temperature_2m_max[0])+'°C':'--',
+    tMoy:daily?Math.round((daily.temperature_2m_max[0]+daily.temperature_2m_min[0])/2)+'°C':'--',
+    lluvia:daily?Math.round(daily.precipitation_probability_max[0])+'%':'--',
+    mm:daily?Math.round(daily.precipitation_sum[0]*10)/10+' mm':'--',
+    viento:daily?Math.round(daily.windspeed_10m_max[0])+' km/h':'--',
+    desc:wmoDesc(cw.weathercode)
+  };
+}
+
+function getPrintStyles(){
+  return`<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @page{margin:12mm 14mm}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',system-ui,sans-serif}
+    body{background:#fff;color:#1a1a1a;font-size:10pt;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .pdf-page{padding:0;page-break-after:always}
+    .pdf-page:last-child{page-break-after:avoid}
+    .pdf-header{background:#F5A623;padding:14px 18px;display:flex;justify-content:space-between;align-items:flex-start;border-radius:8px;margin-bottom:14px}
+    .pdf-title{font-size:15pt;font-weight:700;color:#1a1a1a;letter-spacing:-.2px}
+    .pdf-obra{font-size:9.5pt;color:#3a2a00;margin-top:3px;font-weight:400}
+    .pdf-date{font-size:9.5pt;font-weight:600;color:#3a2a00;text-align:right}
+    .pdf-meteo{background:#fffbf0;border:1px solid #ffe082;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+    .pdf-meteo-icon{font-size:22pt}
+    .pdf-meteo-temps{display:flex;gap:12px;align-items:baseline}
+    .pdf-meteo-main{font-size:18pt;font-weight:700;color:#1a1a1a}
+    .pdf-meteo-range{font-size:9pt;color:#888}
+    .pdf-meteo-details{display:flex;gap:16px;font-size:9pt;color:#555;margin-top:2px;flex-wrap:wrap}
+    .pdf-meteo-detail{display:flex;align-items:center;gap:4px}
+    .pdf-sec{display:flex;align-items:center;gap:7px;margin:12px 0 6px;padding-bottom:5px;border-bottom:2px solid #F5A623}
+    .pdf-sec-icon{font-size:11pt}
+    .pdf-sec-title{font-size:9pt;font-weight:600;color:#1a1a1a;text-transform:uppercase;letter-spacing:.4px}
+    .pdf-text{font-size:10pt;color:#333;line-height:1.65;padding:2px 0 4px}
+    .pdf-none{font-size:9pt;color:#bbb;font-style:italic}
+    .pdf-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0}
+    .pdf-foto-wrap{position:relative;border-radius:8px;overflow:hidden;border:1px solid #eee}
+    .pdf-foto{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+    .pdf-foto-hora{position:absolute;bottom:0;right:0;left:0;background:linear-gradient(transparent,rgba(0,0,0,.5));color:#fff;font-size:7.5pt;padding:12px 5px 4px;text-align:right}
+    .pdf-ped-foto{width:100%;max-height:70px;object-fit:cover;border-radius:5px;margin-top:5px;border:1px solid #eee}
+    .pdf-grid2{display:grid;grid-template-columns:1fr 1fr;gap:3px 14px}
+    .pdf-person{font-size:9.5pt;padding:4px 0;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:6px}
+    .pdf-person.ok{color:#2e7d32}
+    .pdf-person.abs{color:#c62828}
+    .pdf-person-mark{font-size:10pt;font-weight:700}
+    .pdf-rol{font-size:8pt;color:#999;margin-left:2px}
+    .pdf-ped{font-size:9.5pt;color:#333;padding:5px 0;border-bottom:1px solid #f0f0f0;line-height:1.5;display:flex;align-items:flex-start;gap:7px;flex-wrap:wrap}
+    .pdf-ped-info{flex:1}
+    .pdf-prov{color:#aaa;font-size:8.5pt}
+    .pdf-eq{font-size:9.5pt;color:#333;padding:3px 0;display:flex;align-items:center;gap:7px}
+    .pdf-tag{font-size:7.5pt;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+    .tag-ok{background:#e8f5e9;color:#2e7d32}
+    .tag-urg{background:#fce4ec;color:#c62828}
+    .tag-wn{background:#fff8e1;color:#e65100}
+    .tag-nu{background:#f5f5f5;color:#999}
+    .pdf-cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F5A623;text-align:center;padding:40px;page-break-after:always}
+    .pdf-cover-emoji{font-size:48pt;margin-bottom:16px}
+    .pdf-cover-title{font-size:26pt;font-weight:700;color:#1a1a1a;margin-bottom:10px}
+    .pdf-cover-obra{font-size:14pt;color:#3a2a00;margin-bottom:6px;font-weight:500}
+    .pdf-cover-dates{font-size:11pt;color:#5a4a00;margin-bottom:4px}
+    .pdf-cover-count{font-size:10pt;color:#7a6a00;margin-top:10px;background:rgba(0,0,0,.08);padding:6px 16px;border-radius:20px;display:inline-block}
+    .pdf-footer{margin-top:16px;padding-top:8px;border-top:1px solid #f0f0f0;font-size:7pt;color:#ccc;text-align:center;letter-spacing:.2px}
+  </style>`;
+}
+
+function buildPageHTML(obra,fk,est,inclClima){
+  const [yr,m,d]=fk.split('-');
+  const fd=new Date(parseInt(yr),parseInt(m)-1,parseInt(d));
+  const fechaStr=JOURS[fd.getDay()]+' '+fd.getDate()+' '+MOIS_L[fd.getMonth()]+' '+yr;
+  const nota=est.notas[fk]||'<em style="color:#bbb">Sans note enregistrée</em>';
+  const fotos=(est.fotos[fk]||[]).filter(Boolean);
+  const presentes=est.personal.filter(p=>p.p);
+  const ausentes=est.personal.filter(p=>!p.p);
+  const cl=inclClima?getClimaInfo():null;
+
+  const sec=(title,icon)=>`<div class="pdf-sec"><span class="pdf-sec-icon">${icon}</span><span class="pdf-sec-title">${title}</span></div>`;
+
+  const fotosHTML=fotos.length>0
+    ?`<div class="pdf-fotos">${fotos.map(f=>`<div class="pdf-foto-wrap"><img src="${f.src}" class="pdf-foto"><div class="pdf-foto-hora">${f.hora}</div></div>`).join('')}</div>`
+    :`<p class="pdf-none">Aucune photo enregistrée</p>`;
+
+  const meteoHTML=cl?`
+    <div class="pdf-meteo">
+      <div class="pdf-meteo-icon">🌤</div>
+      <div style="flex:1">
+        <div class="pdf-meteo-temps">
+          <span class="pdf-meteo-main">${cl.tMoy}</span>
+          <span class="pdf-meteo-range">${cl.tMin} — ${cl.tMax} · ${cl.desc}</span>
+        </div>
+        <div class="pdf-meteo-details">
+          <div class="pdf-meteo-detail">🌧 Pluie: ${cl.lluvia} (${cl.mm})</div>
+          <div class="pdf-meteo-detail">💨 Vent: ${cl.viento}</div>
+          <div class="pdf-meteo-detail">📍 Thionck Essyl</div>
+        </div>
+      </div>
+    </div>`:'';
+
+  return`<div class="pdf-page">
+    <div class="pdf-header">
+      <div><div class="pdf-title">Journal de Chantier</div><div class="pdf-obra">${obra.nombre}</div></div>
+      <div class="pdf-date">${fechaStr}</div>
+    </div>
+    ${meteoHTML}
+    ${sec('Note du jour','📝')}
+    <p class="pdf-text">${nota}</p>
+    ${sec(`Photos du jour (${fotos.length})`,'📷')}
+    ${fotosHTML}
+    ${sec(`Personnel — ${presentes.length} présent(s) / ${est.personal.length}`,'👷')}
+    <div class="pdf-grid2">
+      ${presentes.map(p=>`<div class="pdf-person ok"><span class="pdf-person-mark">✔</span> ${p.n} <span class="pdf-rol">${p.r}</span></div>`).join('')}
+      ${ausentes.map(p=>`<div class="pdf-person abs"><span class="pdf-person-mark">✘</span> ${p.n} <span class="pdf-rol">${p.r}</span></div>`).join('')}
+    </div>
+    ${sec('Commandes et matériaux','📦')}
+    ${est.pedidos.length>0
+      ?est.pedidos.map(p=>{
+        const lbl={ent:'Livré',urg:'Urgent',transit:'En transit',enu:'Annulé'}[p.estado];
+        const cls={ent:'tag-ok',urg:'tag-urg',transit:'tag-wn',enu:'tag-nu'}[p.estado];
+        const fotoHtml=p.foto?`<img src="${p.foto}" class="pdf-ped-foto">`:'';
+        return`<div class="pdf-ped"><span class="pdf-tag ${cls}">${lbl}</span><div class="pdf-ped-info"><strong>${p.nombre}</strong> — ${p.cantidad} <span class="pdf-prov">${p.proveedor}</span>${fotoHtml}</div></div>`;
+      }).join('')
+      :`<p class="pdf-none">Aucune commande active</p>`}
+    ${sec('Engins sur chantier','🚜')}
+    <div class="pdf-grid2">
+      ${est.equipos.map(e=>{
+        const lbl={ok:'Opérationnel',warn:'En service',alert:'En panne'}[e.estado];
+        const cls={ok:'tag-ok',warn:'tag-wn',alert:'tag-urg'}[e.estado];
+        return`<div class="pdf-eq"><span class="pdf-tag ${cls}">${lbl}</span>${e.nombre}</div>`;
+      }).join('')||`<p class="pdf-none">Aucun engin enregistré</p>`}
+    </div>
+    <div class="pdf-footer">Journal de Chantier · Généré le ${new Date().toLocaleString('fr-FR')}</div>
+  </div>`;
+}
+
+function openPrintWindow(html){
+  const w=window.open('','_blank');
+  if(!w){alert("Autorisez les pop-ups pour générer le PDF, puis réessayez.");return;}
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Journal de Chantier</title>${getPrintStyles()}</head><body>${html}<script>window.onload=function(){setTimeout(()=>window.print(),400);}<\/script></body></html>`);
+  w.document.close();
+}
+
+function exportarPDF(){
+  openPrintWindow(buildPageHTML(OBRAS[obraIdx],fechaKey(fechaActual),ESTADO[obraIdx],true));
+}
+
+function exportarHistorialPDF(){
+  const est=ESTADO[obraIdx];
+  const obra=OBRAS[obraIdx];
+  const todasFechas=new Set([
+    ...Object.keys(est.notas),
+    ...Object.keys(est.fotos).filter(k=>(est.fotos[k]||[]).some(Boolean))
+  ]);
+  if(todasFechas.size===0){alert("Aucun historique enregistré pour ce chantier.");return;}
+  const fechasOrdenadas=[...todasFechas].sort();
+  const d0=fechasOrdenadas[0].split('-');
+  const d1=fechasOrdenadas[fechasOrdenadas.length-1].split('-');
+  const fd0=new Date(d0[0],d0[1]-1,d0[2]);
+  const fd1=new Date(d1[0],d1[1]-1,d1[2]);
+  const cover=`<div class="pdf-cover">
+    <div class="pdf-cover-emoji">📋</div>
+    <div class="pdf-cover-title">Journal de Chantier</div>
+    <div class="pdf-cover-obra">${obra.nombre}</div>
+    <div class="pdf-cover-dates">Du ${fd0.getDate()} ${MOIS_L[fd0.getMonth()]} ${fd0.getFullYear()} au ${fd1.getDate()} ${MOIS_L[fd1.getMonth()]} ${fd1.getFullYear()}</div>
+    <div class="pdf-cover-count">${fechasOrdenadas.length} jour(s) enregistré(s)</div>
+  </div>`;
+  openPrintWindow(cover+fechasOrdenadas.map(fk=>buildPageHTML(obra,fk,est,false)).join(''));
+}
+
+// ── MODALES ───────────────────────────────────────────────
+function abrirModal(id){document.getElementById(id).classList.add('vis')}
+function cerrarModal(id){document.getElementById(id).classList.remove('vis')}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('vis')}));
+
+// ── INIT ──────────────────────────────────────────────────
+actualizarFecha();
+renderTabActual();
+fetchClima();
+
+if('serviceWorker' in navigator){
+  const sw=`const C='chantier-v3';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+}
+</script>
+</body>
+</html>
