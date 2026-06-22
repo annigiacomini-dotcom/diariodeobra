@@ -196,8 +196,13 @@ input[type=file]{display:none}
       <div class="ps-card aus"><div class="ps-num" id="cntAus">0</div><div class="ps-lbl">Absents</div></div>
       <div class="ps-card"><div class="ps-num" id="cntTot">0</div><div class="ps-lbl">Total</div></div>
     </div>
+    <input class="inp" id="buscarPersonal" placeholder="Rechercher..." oninput="renderPersonal()" style="margin-bottom:10px">
     <button class="btn-primary" onclick="abrirModal('modalPersona')"><i class="ti ti-user-plus"></i>Ajouter une personne</button>
-    <p class="stitle"><i class="ti ti-users"></i>Liste du personnel</p>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button id="btnTabStaff" onclick="switchPersonalTab('staff')" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #F5A623;background:#FFF8E1;color:#f57f17;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Personnel fixe</button>
+      <button id="btnTabST" onclick="switchPersonalTab('st')" style="flex:1;padding:8px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#999;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Sous-traitants</button>
+    </div>
+    <p class="stitle"><i class="ti ti-users"></i><span id="personalTabTitle">Personnel fixe</span></p>
     <div class="card" id="personalLista"></div>
   </div>
 
@@ -285,15 +290,93 @@ let fotoSlotIdx=null;
 let lastClimaData=null;
 let pedidoFotoIdx=null;
 
+// Personnel tab state: 'staff' or 'st' (sous-traitants)
+let personalTab='staff';
+function switchPersonalTab(t){
+  personalTab=t;
+  document.getElementById('btnTabStaff').style.cssText='flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border:'+(t==='staff'?'1.5px solid #F5A623;background:#FFF8E1;color:#f57f17':'1px solid #ddd;background:#fff;color:#999');
+  document.getElementById('btnTabST').style.cssText='flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;border:'+(t==='st'?'1.5px solid #F5A623;background:#FFF8E1;color:#f57f17':'1px solid #ddd;background:#fff;color:#999');
+  document.getElementById('personalTabTitle').textContent=t==='staff'?'Personnel fixe':'Sous-traitants';
+  renderPersonal();
+}
+
+function ini(n){return n.split(' ').filter(w=>w.length>1).slice(0,2).map(w=>w[0].toUpperCase()).join('')}
+
 let ESTADO={
   0:{
     personal:[
-      {n:"Mamadou Diallo",r:"Maçon",i:"MD",p:true},
-      {n:"Ibrahima Sow",r:"Chef d'équipe",i:"IS",p:true},
-      {n:"Ousmane Ndiaye",r:"Charpentier",i:"ON",p:true},
-      {n:"Fatou Diop",r:"Technicienne",i:"FD",p:false},
-      {n:"Cheikh Bâ",r:"Maçon",i:"CB",p:true},
-      {n:"Lamine Fall",r:"Aide",i:"LF",p:true}
+      // ── PERSONNEL FIXE — alphabetical by last name ──────
+      {n:"Abacar Sambou",          r:"Béton",                        i:"AS", p:true,  st:false},
+      {n:"Abdoul A. Sambou",       r:"Béton",                        i:"AS", p:true,  st:false},
+      {n:"Abdoulaye Diatta",       r:"Coffrage",                     i:"AD", p:true,  st:false},
+      {n:"Abdoulaye Sambou",       r:"Surveillant",                  i:"AS", p:true,  st:false},
+      {n:"Abdoulaye T. Mane",      r:"Équipe",                       i:"AM", p:true,  st:false},
+      {n:"Abdourahmane Ndiaye",    r:"Équipe",                       i:"AN", p:true,  st:false},
+      {n:"Aliou Diatta",           r:"Équipe",                       i:"AD", p:true,  st:false},
+      {n:"Aliu Badou Sagna",       r:"Béton",                        i:"AS", p:true,  st:false},
+      {n:"Amala Diatta",           r:"Coffrage pentes",              i:"AD", p:true,  st:false},
+      {n:"Apolo Badji",            r:"Coffrage menuisier",           i:"AB", p:true,  st:false},
+      {n:"Babou Diatta",           r:"Équipe",                       i:"BD", p:true,  st:false},
+      {n:"Bakary Badji",           r:"Pisé",                         i:"BB", p:true,  st:false},
+      {n:"Bassirou Sane",          r:"Équipe",                       i:"BS", p:true,  st:false},
+      {n:"Bathie Gning",           r:"Béton",                        i:"BG", p:true,  st:false},
+      {n:"Bouba Car",              r:"Béton",                        i:"BC", p:true,  st:false},
+      {n:"Cheikh T. Diatta",       r:"Équipe",                       i:"CD", p:true,  st:false},
+      {n:"Cherif Badji",           r:"Équipe",                       i:"CB", p:true,  st:false},
+      {n:"Dembo Sane",             r:"Équipe",                       i:"DS", p:true,  st:false},
+      {n:"Djiby Diatta",           r:"Surveillant",                  i:"DD", p:true,  st:false},
+      {n:"Doudou Sadio",           r:"Pisé",                         i:"DS", p:true,  st:false},
+      {n:"Eno Niassy",             r:"Chef du chantier",             i:"EN", p:true,  st:false},
+      {n:"Famara Badji",           r:"Équipe",                       i:"FB", p:true,  st:false},
+      {n:"Ibrahima Diane",         r:"Équipe",                       i:"ID", p:true,  st:false},
+      {n:"Ibrahima Diatta",        r:"Chef du coffrage de pisé",     i:"ID", p:true,  st:false},
+      {n:"Ibrahima Djiba",         r:"Chef du coffrage",             i:"ID", p:true,  st:false},
+      {n:"Idrissa Camara",         r:"Équipe",                       i:"IC", p:true,  st:false},
+      {n:"Idrissa Diatta",         r:"Assistant ENO / Surveillant",  i:"ID", p:true,  st:false},
+      {n:"Ilimane Sambou",         r:"Chef de pisé",                 i:"IS", p:true,  st:false},
+      {n:"Issa M. Sambou",         r:"Équipe",                       i:"IS", p:true,  st:false},
+      {n:"Jacob Sambou",           r:"Pisé",                         i:"JS", p:true,  st:false},
+      {n:"Keba Badji",             r:"Chef ferraillage (instala)",   i:"KB", p:true,  st:false},
+      {n:"Lamine Djiba",           r:"Coffrage",                     i:"LD", p:true,  st:false},
+      {n:"Lansana A. Sambou",      r:"Équipe",                       i:"LS", p:true,  st:false},
+      {n:"Malang Koly",            r:"Équipe",                       i:"MK", p:true,  st:false},
+      {n:"Mamadou A. Djiba",       r:"Équipe",                       i:"MD", p:true,  st:false},
+      {n:"Mamadou Diatta",         r:"Chef fondation / coffrage",    i:"MD", p:true,  st:false},
+      {n:"Mamadou E. Sambou",      r:"Équipe",                       i:"MS", p:true,  st:false},
+      {n:"Mamadou N. Diatta",      r:"Béton",                        i:"MD", p:true,  st:false},
+      {n:"Mamadou Sambou",         r:"Coffrage",                     i:"MS", p:true,  st:false},
+      {n:"Mamina Diedhiou",        r:"Équipe",                       i:"MD", p:true,  st:false},
+      {n:"Matar Badji",            r:"Équipe",                       i:"MB", p:true,  st:false},
+      {n:"Moussa Badji",           r:"Équipe",                       i:"MB", p:true,  st:false},
+      {n:"Moustapha Badji",        r:"Chef du béton",                i:"MB", p:true,  st:false},
+      {n:"Nassirou Diatta",        r:"Béton",                        i:"ND", p:true,  st:false},
+      {n:"Ndiaga Sane",            r:"Équipe",                       i:"NS", p:true,  st:false},
+      {n:"Nfaly Dieme",            r:"Coffrage",                     i:"ND", p:true,  st:false},
+      {n:"Nouha Mane",             r:"Chef ferraillage (dobla)",     i:"NM", p:true,  st:false},
+      {n:"Oumar Diatta Sagna",     r:"Équipe",                       i:"OD", p:true,  st:false},
+      {n:"Ousmane Badji",          r:"Équipe",                       i:"OB", p:true,  st:false},
+      {n:"Ousmane Djiba",          r:"Équipe",                       i:"OD", p:true,  st:false},
+      {n:"Ousmane L. Badji",       r:"Équipe",                       i:"OB", p:true,  st:false},
+      {n:"Pah T. Sambou",          r:"Équipe",                       i:"PS", p:true,  st:false},
+      {n:"Sidya Camara",           r:"Échafaudage",                  i:"SC", p:true,  st:false},
+      {n:"Soriaibou Z. Diatta",    r:"Équipe",                       i:"SD", p:true,  st:false},
+      {n:"Souleymane Djiba",       r:"Surveillant",                  i:"SD", p:true,  st:false},
+      {n:"Souleymane Sambou",      r:"Béton",                        i:"SS", p:true,  st:false},
+      {n:"Souleyman Niassy",       r:"Pisé",                         i:"SN", p:true,  st:false},
+      {n:"Yancouba Sadio",         r:"Coffrage",                     i:"YS", p:true,  st:false},
+      {n:"Yaya Diatta",            r:"Coffrage",                     i:"YD", p:true,  st:false},
+      {n:"Yaya Sambou",            r:"Coffrage",                     i:"YS", p:true,  st:false},
+      {n:"Younoussa Diatta",       r:"Béton",                        i:"YD", p:true,  st:false},
+      {n:"Zem Diatta",             r:"Béton",                        i:"ZD", p:true,  st:false},
+      // ── SOUS-TRAITANTS ───────────────────────────────────
+      {n:"Affang Sambou",          r:"Électricité",                  i:"AF", p:true,  st:true},
+      {n:"Aliu Busko Sagna",       r:"Soudures platine",             i:"AB", p:true,  st:true},
+      {n:"Apa",                    r:"Carrelage",                    i:"AP", p:true,  st:true},
+      {n:"Atab",                   r:"Paille",                       i:"AT", p:true,  st:true},
+      {n:"Bekanya",                r:"Plombier",                     i:"BK", p:true,  st:true},
+      {n:"Issah",                  r:"Soudures",                     i:"IS", p:true,  st:true},
+      {n:"Lamine Sambou",          r:"Menuisier",                    i:"LS", p:true,  st:true},
+      {n:"Pape + Femmes",          r:"Peinture",                     i:"PF", p:true,  st:true},
     ],
     pedidos:[
       {nombre:"Fer à béton Ø12",cantidad:"2.5 tonnes",proveedor:"Aciers du Nord",estado:"urg",foto:null},
@@ -581,26 +664,41 @@ function agregarPedido(){
 
 // ── PERSONNEL ─────────────────────────────────────────────
 function renderPersonal(){
-  const pers=ESTADO[obraIdx].personal;
-  const pres=pers.filter(p=>p.p).length;
+  const tous=ESTADO[obraIdx].personal;
+  const filtre=personalTab==='st';
+  const query=(document.getElementById('buscarPersonal')?.value||'').toLowerCase().trim();
+  const liste=tous.filter(p=>p.st===filtre&&(query===''||p.n.toLowerCase().includes(query)||p.r.toLowerCase().includes(query)));
+  // Counters always use full staff list (not sous-traitants)
+  const staff=tous.filter(p=>!p.st);
+  const pres=staff.filter(p=>p.p).length;
   document.getElementById('cntPres').textContent=pres;
-  document.getElementById('cntAus').textContent=pers.length-pres;
-  document.getElementById('cntTot').textContent=pers.length;
-  document.getElementById('personalLista').innerHTML=pers.map((p,i)=>`
-    <div class="li-item">
-      <div class="av">${p.i}</div>
-      <div style="flex:1"><div class="li-name">${p.n}</div><div class="li-rol">${p.r}</div></div>
+  document.getElementById('cntAus').textContent=staff.length-pres;
+  document.getElementById('cntTot').textContent=staff.length;
+  if(!liste.length){
+    document.getElementById('personalLista').innerHTML='<div style="color:#bbb;font-size:12px;padding:8px 0">Aucun résultat</div>';
+    return;
+  }
+  document.getElementById('personalLista').innerHTML=liste.map(p=>{
+    const i=tous.indexOf(p);
+    return`<div class="li-item">
+      <div class="av" style="${p.st?'background:#f3e5f5;border-color:#ce93d8;color:#7b1fa2':''}">${p.i}</div>
+      <div style="flex:1">
+        <div class="li-name">${p.n}</div>
+        <div class="li-rol">${p.r}${p.st?' · <span style="color:#9c27b0;font-size:9px">SOUS-TRAITANT</span>':''}</div>
+      </div>
       <div class="chk ${p.p?'pres':'abs'}" onclick="togglePres(${i})">
         <i class="ti ${p.p?'ti-check':'ti-x'}" style="font-size:14px"></i>
       </div>
       <button class="trash-btn" onclick="eliminarPersona(${i})"><i class="ti ti-trash"></i></button>
-    </div>`).join('')||'<div style="color:#bbb;font-size:12px;padding:8px 0">Aucun personnel enregistré</div>';
+    </div>`;
+  }).join('');
 }
 function togglePres(i){ESTADO[obraIdx].personal[i].p=!ESTADO[obraIdx].personal[i].p;renderPersonal()}
 function agregarPersona(){
   const n=document.getElementById('mpNombreP').value.trim();if(!n)return;
-  const ini=n.split(' ').slice(0,2).map(x=>x[0].toUpperCase()).join('');
-  ESTADO[obraIdx].personal.push({n,r:document.getElementById('mpRol').value.trim()||'Sans rôle',i:ini,p:true});
+  const iv=n.split(' ').filter(w=>w.length>1).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+  const esST=personalTab==='st';
+  ESTADO[obraIdx].personal.push({n,r:document.getElementById('mpRol').value.trim()||'Sans rôle',i:iv,p:true,st:esST});
   cerrarModal('modalPersona');
   document.getElementById('mpNombreP').value='';document.getElementById('mpRol').value='';
   renderPersonal();
@@ -783,27 +881,45 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     y=fy+(fotos.length%PER_ROW!==0?FOTO_H+10:2);
   }
 
-  // Personnel
-  const presentes=est.personal.filter(p=>p.p);
-  const ausentes=est.personal.filter(p=>!p.p);
-  sec(`Personnel — ${presentes.length} présent(s) / ${est.personal.length}`);
+  // Personnel — staff only for main section
+  const staff=est.personal.filter(p=>!p.st);
+  const sousTrait=est.personal.filter(p=>p.st&&p.p);
+  const presentes=staff.filter(p=>p.p);
+  const ausentes=staff.filter(p=>!p.p);
+  sec(`Personnel présent — ${presentes.length} / ${staff.length}`);
   const colW=(W-32)/2;
-  presentes.forEach((p,i)=>{
+  // Two columns for present
+  for(let i=0;i<presentes.length;i++){
     const cx=17+(i%2)*colW;
-    if(i%2===0&&i>0){y+=5;}
-    if(y>270){doc.addPage();y=14;}
-    doc.setTextColor(...vertOk);doc.setFontSize(9);
-    doc.text('✓  '+p.n,cx,y);
-    doc.setTextColor(...gris);doc.setFontSize(8);doc.text(p.r,cx+3,y+4);
-    if(i%2===1||i===presentes.length-1)y+=9;
-  });
+    if(i%2===0){if(y>265){doc.addPage();y=14;}}
+    doc.setTextColor(...vertOk);doc.setFontSize(9);doc.setFont('helvetica','bold');
+    doc.text('OK',cx,y);
+    doc.setFont('helvetica','normal');doc.setTextColor(...noir);
+    doc.text(presentes[i].n,cx+9,y);
+    doc.setTextColor(...gris);doc.setFontSize(8);doc.text(presentes[i].r,cx+9,y+4);
+    if(i%2===1||i===presentes.length-1)y+=10;
+  }
   if(ausentes.length>0){
     y+=2;
-    doc.setFontSize(8);doc.setTextColor(...rougeBad);
-    doc.text('Absents:',17,y);y+=5;
+    if(y>265){doc.addPage();y=14;}
+    doc.setFontSize(8);doc.setTextColor(...rougeBad);doc.setFont('helvetica','bold');
+    doc.text('ABSENTS:',17,y);y+=5;doc.setFont('helvetica','normal');
     ausentes.forEach(p=>{
       if(y>270){doc.addPage();y=14;}
-      doc.setFontSize(9);doc.text('✗  '+p.n+' — '+p.r,20,y);y+=5;
+      doc.setTextColor(...rougeBad);doc.setFontSize(9);
+      doc.text('--  '+p.n+'  ('+p.r+')',20,y);y+=5;
+    });
+  }
+  // Sous-traitants présents
+  if(sousTrait.length>0){
+    y+=3;
+    if(y>260){doc.addPage();y=14;}
+    doc.setFontSize(8);doc.setTextColor(123,31,162);doc.setFont('helvetica','bold');
+    doc.text('SOUS-TRAITANTS PRESENTS:',17,y);y+=5;doc.setFont('helvetica','normal');
+    sousTrait.forEach(p=>{
+      if(y>270){doc.addPage();y=14;}
+      doc.setTextColor(123,31,162);doc.setFontSize(9);
+      doc.text('>>  '+p.n+'  ('+p.r+')',20,y);y+=5;
     });
   }
   y+=3;
@@ -846,8 +962,9 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
       if(y>270){doc.addPage();y=14;}
       const lbl={ok:'Opérationnel',warn:'En service',alert:'En panne'}[e.estado];
       const col={ok:vertOk,warn:orange,alert:rougeBad}[e.estado];
-      doc.setTextColor(...col);doc.setFontSize(8);doc.text('● ',cx,y);
-      doc.setTextColor(...noir);doc.setFontSize(9);doc.text(e.nombre,cx+5,y);
+      doc.setTextColor(...col);doc.setFontSize(8);doc.setFont('helvetica','bold');
+      doc.text({ok:'OK  ',warn:'USE ',alert:'PNE '}[e.estado],cx,y);
+      doc.setFont('helvetica','normal');doc.setTextColor(...noir);doc.setFontSize(9);doc.text(e.nombre,cx+10,y);
       doc.setTextColor(...gris);doc.setFontSize(8);doc.text(lbl,cx+5,y+4);
       if(i%2===1||i===eqs.length-1)y+=9;
     });
