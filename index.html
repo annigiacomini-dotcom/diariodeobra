@@ -149,7 +149,7 @@ input[type=file]{display:none}
     </div>
   </div>
 </div>
-
+ 
 <nav class="nav">
   <button class="nb active" onclick="tab('clima',this)"><i class="ti ti-cloud-sun"></i>Météo</button>
   <button class="nb" onclick="tab('diario',this)"><i class="ti ti-camera"></i>Journal</button>
@@ -157,12 +157,12 @@ input[type=file]{display:none}
   <button class="nb" onclick="tab('personal',this)"><i class="ti ti-users"></i>Personnel</button>
   <button class="nb" onclick="tab('equipos',this)"><i class="ti ti-crane"></i>Engins</button>
 </nav>
-
+ 
 <div class="content">
   <div id="tab-clima" class="tab vis">
     <div id="climaContent"><div class="loading-clima"><i class="ti ti-loader" style="font-size:28px;color:#F5A623"></i>Chargement météo...</div></div>
   </div>
-
+ 
   <div id="tab-diario" class="tab">
     <p class="stitle"><i class="ti ti-camera"></i>Photos du jour</p>
     <div class="foto-grid" id="fotoGrid"></div>
@@ -177,7 +177,7 @@ input[type=file]{display:none}
     <p class="stitle"><i class="ti ti-history"></i>Historique</p>
     <div id="historialLista"></div>
   </div>
-
+ 
   <div id="tab-materiales" class="tab">
     <button class="btn-primary" onclick="abrirModal('modalPedido')"><i class="ti ti-plus"></i>Nouvelle commande</button>
     <p class="stitle"><i class="ti ti-package"></i>Commandes en cours</p>
@@ -186,7 +186,7 @@ input[type=file]{display:none}
     <p class="stitle"><i class="ti ti-stack"></i>Inventaire Bajankusor</p>
     <div id="inventaireLista"></div>
   </div>
-
+ 
   <div id="tab-personal" class="tab">
     <div class="pres-sum">
       <div class="ps-card ok"><div class="ps-num" id="cntPres">0</div><div class="ps-lbl">Présents</div></div>
@@ -202,7 +202,7 @@ input[type=file]{display:none}
     <p class="stitle"><i class="ti ti-users"></i><span id="personalTabTitle">Personnel fixe</span></p>
     <div class="card" id="personalLista"></div>
   </div>
-
+ 
   <div id="tab-equipos" class="tab">
     <button class="btn-primary" onclick="abrirModal('modalEquipo')"><i class="ti ti-plus"></i>Ajouter un engin</button>
     <p class="stitle"><i class="ti ti-crane"></i>Engins sur chantier</p>
@@ -210,13 +210,13 @@ input[type=file]{display:none}
   </div>
 </div>
 </div>
-
+ 
 <!-- PDF loading overlay -->
 <div class="pdf-loading" id="pdfLoading">
   <div class="spin">⏳</div>
   <div>Génération du PDF en cours...</div>
 </div>
-
+ 
 <!-- MODALES -->
 <div class="modal-bg" id="modalPedido">
   <div class="modal">
@@ -266,7 +266,7 @@ input[type=file]{display:none}
     <div id="modalHistContenido"></div>
   </div>
 </div>
-
+ 
 <script>
 const OBRAS=[
   {nombre:"Bajankusor — Thionck Essyl",lat:12.7599,lon:-16.0797},
@@ -277,7 +277,7 @@ const JOURS=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 const JOURS_C=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
 const MOIS=["jan","fév","mar","avr","mai","juin","juil","août","sep","oct","nov","déc"];
 const MOIS_L=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
-
+ 
 let obraIdx=0;
 let fechaActual=new Date(); fechaActual.setHours(0,0,0,0);
 const hoy=new Date(); hoy.setHours(0,0,0,0);
@@ -286,7 +286,7 @@ let climaCache={};
 let fotoSlotIdx=null;
 let lastClimaData=null;
 let pedidoFotoIdx=null;
-
+ 
 // Personnel tab state: 'staff' or 'st' (sous-traitants)
 let personalTab='staff';
 function switchPersonalTab(t){
@@ -296,9 +296,9 @@ function switchPersonalTab(t){
   document.getElementById('personalTabTitle').textContent=t==='staff'?'Personnel fixe':'Sous-traitants';
   renderPersonal();
 }
-
+ 
 function ini(n){return n.split(' ').filter(w=>w.length>1).slice(0,2).map(w=>w[0].toUpperCase()).join('')}
-
+ 
 let ESTADO={
   0:{
     personal:[
@@ -394,7 +394,7 @@ let ESTADO={
     fotos:{},notas:{}
   }
 };
-
+ 
 function fechaKey(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function fmtFecha(d){
   const esHoy=d.getTime()===hoy.getTime();
@@ -427,11 +427,11 @@ function cambiarObra(){
   obraIdx=parseInt(document.getElementById('obraSelect').value);
   climaCache={};lastClimaData=null;fetchClima();renderTabActual();
 }
-
+ 
 // ── MÉTÉO ─────────────────────────────────────────────────
 function wmoIcon(c){if(c===0)return'ti-sun';if(c<=2)return'ti-cloud-sun';if(c<=3)return'ti-cloud';if(c<=49)return'ti-cloud-fog';if(c<=67)return'ti-cloud-rain';if(c<=77)return'ti-snowflake';return'ti-cloud-storm'}
 function wmoDesc(c){if(c===0)return'Ensoleillé';if(c<=2)return'Peu nuageux';if(c<=3)return'Nuageux';if(c<=49)return'Brouillard';if(c<=67)return'Pluie';if(c<=77)return'Neige';return'Orage'}
-
+ 
 async function fetchClima(){
   const obra=OBRAS[obraIdx];
   const key=obraIdx+'_'+fechaKey(fechaActual);
@@ -448,7 +448,7 @@ async function fetchClima(){
     document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-wifi-off" style="font-size:28px;color:#ccc"></i>Pas de connexion</div>';
   }
 }
-
+ 
 function renderClimaData(d){
   lastClimaData=d;
   const cw=d.current_weather;
@@ -504,7 +504,7 @@ function renderClimaData(d){
     <div class="csub" style="margin-top:5px">${maxLluvia>70?'Évaluer la suspension des travaux en hauteur ou du bétonnage.':'Température et vent dans les plages normales de travail.'}</div></div>`;
 }
 function renderClima(){fetchClima()}
-
+ 
 // ── JOURNAL ───────────────────────────────────────────────
 function renderDiario(){
   const fk=fechaKey(fechaActual);
@@ -527,7 +527,7 @@ function renderDiario(){
         <div class="hist-stats"><span class="hist-stat"><i class="ti ti-camera" style="font-size:11px"></i>${fCnt} photo(s)</span></div>
       </div>`;}).join('');
 }
-
+ 
 // Key fix: no capture attribute on the input → iOS shows "Take Photo" OR "Choose from Library"
 function abrirGaleria(idx){
   fotoSlotIdx=idx;
@@ -535,7 +535,7 @@ function abrirGaleria(idx){
   fi.onchange=onFotoSelected;
   fi.click();
 }
-
+ 
 function onFotoSelected(e){
   const file=e.target.files[0];
   if(!file||fotoSlotIdx===null)return;
@@ -564,7 +564,7 @@ function onFotoSelected(e){
   };
   img.src=url;
 }
-
+ 
 function eliminarFoto(i){
   if(confirm('Supprimer cette photo ?')){
     ESTADO[obraIdx].fotos[fechaKey(fechaActual)][i]=null;
@@ -592,7 +592,7 @@ function verHistorial(k){
     </div>`;
   abrirModal('modalHist');
 }
-
+ 
 // ── MATÉRIAUX ─────────────────────────────────────────────
 function renderMateriales(){
   const peds=ESTADO[obraIdx].pedidos;
@@ -618,7 +618,7 @@ function renderMateriales(){
     </div>`;
   }).join('');
 }
-
+ 
 function pedidoFoto(i){
   pedidoFotoIdx=i;fotoSlotIdx=null;
   const fi=document.getElementById('fileInput');
@@ -653,7 +653,7 @@ function agregarPedido(){
   saveHistorique();
   renderMateriales();
 }
-
+ 
 // ── PERSONNEL ─────────────────────────────────────────────
 function renderPersonal(){
   const tous=ESTADO[obraIdx].personal;
@@ -696,7 +696,7 @@ function agregarPersona(){
   renderPersonal();
 }
 function eliminarPersona(i){if(confirm('Supprimer cette personne ?')){ESTADO[obraIdx].personal.splice(i,1);renderPersonal();}}
-
+ 
 // ── ENGINS ────────────────────────────────────────────────
 const EQ_ICONS={'Bétonnière':'ti-truck','Échafaudage tubulaire':'ti-ladder','Compresseur 200L':'ti-engine','Vibrateur à béton':'ti-tool','Grue à tour':'ti-crane','Petite bétonnière':'ti-truck','Échelle aluminium':'ti-ladder'};
 function renderEquipos(){
@@ -718,7 +718,7 @@ function agregarEquipo(){
   renderEquipos();
 }
 function eliminarEquipo(i){if(confirm('Supprimer cet engin ?')){ESTADO[obraIdx].equipos.splice(i,1);renderEquipos();}}
-
+ 
 // ── PDF avec jsPDF + images base64 ───────────────────────
 function getClimaInfo(){
   if(!lastClimaData)return{tMin:'--',tMax:'--',tMoy:'--',lluvia:'--',mm:'--',viento:'--',desc:'N/D'};
@@ -734,7 +734,7 @@ function getClimaInfo(){
     desc:wmoDesc(cw.weathercode)
   };
 }
-
+ 
 async function exportarPDF(historique){
   const overlay=document.getElementById('pdfLoading');
   overlay.classList.add('vis');
@@ -744,7 +744,7 @@ async function exportarPDF(historique){
     const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     const est=ESTADO[obraIdx];
     const obra=OBRAS[obraIdx];
-
+ 
     let fechas;
     if(historique){
       const todas=new Set([
@@ -767,13 +767,13 @@ async function exportarPDF(historique){
     } else {
       fechas=[fechaKey(fechaActual)];
     }
-
+ 
     for(let fi=0;fi<fechas.length;fi++){
       const fk=fechas[fi];
       if(fi>0||historique) doc.addPage();
       await buildPDFPage(doc,obra,fk,est,!historique);
     }
-
+ 
     const fname=historique
       ?'Historique_'+obra.nombre.replace(/[^a-zA-Z0-9]/g,'_')+'.pdf'
       :'Rapport_'+fechaKey(fechaActual)+'.pdf';
@@ -785,22 +785,22 @@ async function exportarPDF(historique){
     overlay.classList.remove('vis');
   }
 }
-
+ 
 async function buildPDFPage(doc,obra,fk,est,inclClima){
   const W=210;
   const [yr,m,d]=fk.split('-');
   const fd=new Date(parseInt(yr),parseInt(m)-1,parseInt(d));
   const fechaStr=JOURS[fd.getDay()]+' '+fd.getDate()+' '+MOIS_L[fd.getMonth()]+' '+yr;
-
+ 
   const amarillo=[245,166,35];
   const noir=[26,26,26];
   const gris=[100,100,100];
   const vertOk=[46,125,50];
   const rougeBad=[198,40,40];
   const orange=[230,81,0];
-
+ 
   let y=0;
-
+ 
   // Header band
   doc.setFillColor(...amarillo);doc.rect(0,0,W,30,'F');
   doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(...noir);
@@ -810,7 +810,7 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
   doc.setFont('helvetica','bold');doc.setFontSize(10);
   doc.text(fechaStr,W-14,20,{align:'right'});
   y=36;
-
+ 
   // Météo block
   if(inclClima){
     const cl=getClimaInfo();
@@ -823,7 +823,7 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     doc.text(`Pluie: ${cl.lluvia} (${cl.mm})   Vent max: ${cl.viento}   ${cl.desc}`,90,y+13);
     y+=26;
   }
-
+ 
   // Section helper
   const sec=(titre)=>{
     if(y>262){doc.addPage();y=14;}
@@ -832,20 +832,20 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     doc.text(titre.toUpperCase(),17,y+4.2);
     y+=10;doc.setTextColor(...noir);doc.setFont('helvetica','normal');doc.setFontSize(9.5);
   };
-
+ 
   const lin=(txt,col)=>{
     if(y>270){doc.addPage();y=14;}
     doc.setTextColor(...(col||gris));doc.setFontSize(9.5);doc.setFont('helvetica','normal');
     const lines=doc.splitTextToSize(txt,W-32);
     doc.text(lines,17,y);y+=lines.length*5+1.5;
   };
-
+ 
   // Note
   const nota=est.notas[fk];
   sec('Note du jour');
   lin(nota||'Sans note enregistrée', nota?noir:gris);
   y+=2;
-
+ 
   // Photos — embed as real images in PDF
   const fotos=(est.fotos[fk]||[]).filter(Boolean);
   sec(`Photos du jour (${fotos.length})`);
@@ -872,7 +872,7 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     }
     y=fy+(fotos.length%PER_ROW!==0?FOTO_H+10:2);
   }
-
+ 
   // Personnel — staff only for main section
   const staff=est.personal.filter(p=>!p.st);
   const sousTrait=est.personal.filter(p=>p.st&&p.p);
@@ -915,7 +915,7 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     });
   }
   y+=3;
-
+ 
   // Commandes
   sec('Commandes et matériaux');
   if(est.pedidos.length===0){lin('Aucune commande active');}
@@ -942,7 +942,7 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     });
   }
   y+=2;
-
+ 
   // Engins
   sec('Engins sur chantier');
   const eqs=est.equipos;
@@ -961,14 +961,14 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
       if(i%2===1||i===eqs.length-1)y+=9;
     });
   }
-
+ 
   // Footer
   y=Math.max(y+6,280);
   doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(14,y,W-14,y);
   doc.setFontSize(7);doc.setTextColor(180,180,180);
   doc.text('Journal de Chantier  ·  Généré le '+new Date().toLocaleString('fr-FR'),W/2,y+5,{align:'center'});
 }
-
+ 
 // ── INVENTAIRE BAJANKUSOR — stock 1 à 5 ──────────────────
 const INVENTAIRE=[
   // GRANULATS
@@ -1002,7 +1002,7 @@ const INVENTAIRE=[
   // DIVERS
   {cat:"Divers",      nom:"Paille (Atab)",                           stock:5, note:"Commandé pour 506+508"},
 ];
-
+ 
 function dotStock(s){
   // s = 0..5. 0 = épuisé (rouge), 1-2 = bas, 3 = moyen, 4-5 = bon
   const MAX=5;
@@ -1014,7 +1014,7 @@ function dotStock(s){
   const lbl=s===0?'<span class="bdg bal">Commander</span>':s<=2?'<span class="bdg bwn">Stock bas</span>':s<=3?'<span class="bdg bwn" style="background:#fff8e1;color:#f57f17">Moyen</span>':'<span class="bdg bok">OK</span>';
   return`<div style="display:flex;align-items:center;gap:8px;margin-top:4px">${dots}${lbl}</div>`;
 }
-
+ 
 function renderInventaire(){
   const cats=[...new Set(INVENTAIRE.map(i=>i.cat))];
   document.getElementById('inventaireLista').innerHTML=cats.map(cat=>{
@@ -1041,7 +1041,7 @@ function renderInventaire(){
     </div>`;
   }).join('');
 }
-
+ 
 function commanderMateriau(idx){
   const it=INVENTAIRE[idx];
   // Pre-fill modal and open it
@@ -1051,10 +1051,10 @@ function commanderMateriau(idx){
   document.getElementById('mpEstado').value='urg';
   abrirModal('modalPedido');
 }
-
+ 
 // ── HISTORIQUE — localStorage ─────────────────────────────
 const LS_KEY='chantier_hist_v1';
-
+ 
 function saveHistorique(){
   try{
     const data={};
@@ -1075,7 +1075,7 @@ function saveHistorique(){
     localStorage.setItem(LS_KEY,JSON.stringify(data));
   }catch(e){console.warn('Save failed:',e);}
 }
-
+ 
 function loadHistorique(){
   try{
     const raw=localStorage.getItem(LS_KEY);
@@ -1096,18 +1096,18 @@ function loadHistorique(){
     });
   }catch(e){console.warn('Load failed:',e);}
 }
-
+ 
 // ── MODALES ───────────────────────────────────────────────
 function abrirModal(id){document.getElementById(id).classList.add('vis')}
 function cerrarModal(id){document.getElementById(id).classList.remove('vis')}
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('vis')}));
-
+ 
 // ── INIT ──────────────────────────────────────────────────
 loadHistorique();
 actualizarFecha();
 renderTabActual();
 fetchClima();
-
+ 
 if('serviceWorker' in navigator){
   const sw=`const C='chantier-v4';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
