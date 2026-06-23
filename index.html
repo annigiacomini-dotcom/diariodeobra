@@ -375,17 +375,10 @@ let ESTADO={
       {n:"Lamine Sambou",          r:"Menuisier",                    i:"LS", p:true,  st:true},
       {n:"Pape + Femmes",          r:"Peinture",                     i:"PF", p:true,  st:true},
     ],
-    pedidos:[
-      {nombre:"Fer à béton Ø12",cantidad:"2.5 tonnes",proveedor:"Aciers du Nord",estado:"urg",foto:null},
-      {nombre:"Ciment Portland",cantidad:"80 sacs",proveedor:"Lafarge",estado:"transit",foto:null},
-      {nombre:"Briques céramiques",cantidad:"1200 u",proveedor:"Briqueterie Sud",estado:"ent",foto:null}
-    ],
+    pedidos:[],
     equipos:[
-      {nombre:"Bétonnière",estado:"ok"},
-      {nombre:"Échafaudage tubulaire",estado:"warn"},
-      {nombre:"Compresseur 200L",estado:"ok"},
-      {nombre:"Vibrateur à béton",estado:"alert"},
-      {nombre:"Grue à tour",estado:"ok"}
+      {nombre:"Bétonnière jeune",estado:"ok"},
+      {nombre:"Bétonnière verte",estado:"ok"},
     ],
     fotos:{},notas:{}
   },
@@ -666,7 +659,11 @@ function renderPersonal(){
   const tous=ESTADO[obraIdx].personal;
   const filtre=personalTab==='st';
   const query=(document.getElementById('buscarPersonal')?.value||'').toLowerCase().trim();
-  const liste=tous.filter(p=>p.st===filtre&&(query===''||p.n.toLowerCase().includes(query)||p.r.toLowerCase().includes(query))).sort((a,b)=>{const la=a.n.split(' ').slice(-1)[0],lb=b.n.split(' ').slice(-1)[0];return la.localeCompare(lb,'fr');});
+  const liste=tous.filter(p=>p.st===filtre&&(query===''||p.n.toLowerCase().includes(query)||p.r.toLowerCase().includes(query))).sort((a,b)=>{
+    // Extract last name: last word that is not an initial (length > 1)
+    const lastName=n=>n.trim().split(' ').filter(w=>w.length>1).pop()||n;
+    return lastName(a.n).localeCompare(lastName(b.n),'fr');
+  });
   // Counters always use full staff list (not sous-traitants)
   const staff=tous.filter(p=>!p.st);
   const pres=staff.filter(p=>p.p).length;
@@ -976,64 +973,70 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
   doc.text('Journal de Chantier  ·  Généré le '+new Date().toLocaleString('fr-FR'),W/2,y+5,{align:'center'});
 }
 
-// ── INVENTAIRE BAJANKUSOR ─────────────────────────────────
+// ── INVENTAIRE BAJANKUSOR — stock 1 à 5 ──────────────────
 const INVENTAIRE=[
   // GRANULATS
-  {cat:"Granulats",nom:"Gravier basalte béton (Dakar)",unite:"camion",stock:0,seuil:1,note:"1 camion x 40m3"},
-  {cat:"Granulats",nom:"Gravier Thionck (dalles/béton propreté)",unite:"camion",stock:4,seuil:2,note:"ø3-8"},
-  {cat:"Granulats",nom:"Gravier pisé (couleur claire)",unite:"sacs",stock:2,seuil:2,note:"ø8-16"},
-  {cat:"Granulats",nom:"Sable blanc",unite:"camion",stock:2,seuil:1,note:"1 camion x 16m3"},
+  {cat:"Granulats",   nom:"Gravier basalte béton (Dakar)",         stock:0, note:"1 camion x 40m3 · à commander chaque semaine"},
+  {cat:"Granulats",   nom:"Gravier Thionck — dalles / béton prop.", stock:4, note:"ø3-8"},
+  {cat:"Granulats",   nom:"Gravier pisé (couleur claire)",          stock:2, note:"ø8-16"},
+  {cat:"Granulats",   nom:"Sable blanc",                            stock:2, note:"1 camion x 16m3"},
   // LIANTS
-  {cat:"Liants",nom:"Ciment 32.5 (Thionck — Agnamba)",unite:"sacs 50kg",stock:0,seuil:50,note:"Pour fondations"},
-  {cat:"Liants",nom:"Ciment 42.5 (Dakar — poutres)",unite:"sacs 50kg",stock:0,seuil:100,note:"Cmdr 400 sacs (20T) pour 504/507"},
-  {cat:"Liants",nom:"Chaux vive",unite:"pots",stock:1,seuil:2,note:"Cmdr 2 pots"},
+  {cat:"Liants",      nom:"Ciment 32.5 — Agnamba Thionck",          stock:3, note:"Fondations"},
+  {cat:"Liants",      nom:"Ciment 42.5 — Dakar (poutres)",          stock:3, note:"Cmdr 400 sacs (20T) pour 504/507"},
+  {cat:"Liants",      nom:"Chaux vive",                             stock:1, note:"Cmdr 2 pots"},
   // BOIS
-  {cat:"Bois",nom:"Bois blanc (portes et coffrages)",unite:"planches",stock:0,seuil:20,note:"Planches 19x400"},
-  {cat:"Bois",nom:"Bois rouge (charpente)",unite:"ML",stock:0,seuil:100,note:"2054 ML x 40mm"},
-  {cat:"Bois",nom:"Contreplaqué (coffrages)",unite:"planches",stock:0,seuil:20,note:"Cmdr 400 planches"},
+  {cat:"Bois",        nom:"Bois blanc — portes et coffrages",        stock:1, note:"Planches 19x400"},
+  {cat:"Bois",        nom:"Bois rouge — charpente",                  stock:3, note:"2054 ML x 40mm"},
+  {cat:"Bois",        nom:"Contreplaqué — coffrages",                stock:3, note:""},
   // ARMATURES
-  {cat:"Armatures",nom:"Fer à béton ø6",unite:"barres",stock:3,seuil:5,note:""},
-  {cat:"Armatures",nom:"Fer à béton ø8",unite:"barres",stock:0,seuil:10,note:""},
-  {cat:"Armatures",nom:"Fer à béton ø10",unite:"barres",stock:0,seuil:10,note:""},
-  {cat:"Armatures",nom:"Fer à béton ø12",unite:"barres",stock:0,seuil:10,note:""},
-  {cat:"Armatures",nom:"Fer à béton ø16",unite:"barres",stock:3,seuil:5,note:""},
-  {cat:"Armatures",nom:"Fer à béton ø20",unite:"barres",stock:3,seuil:5,note:""},
+  {cat:"Armatures",   nom:"Fer à béton ø6",                         stock:3, note:""},
+  {cat:"Armatures",   nom:"Fer à béton ø8",                         stock:0, note:""},
+  {cat:"Armatures",   nom:"Fer à béton ø10",                        stock:0, note:""},
+  {cat:"Armatures",   nom:"Fer à béton ø12",                        stock:0, note:""},
+  {cat:"Armatures",   nom:"Fer à béton ø16",                        stock:3, note:""},
+  {cat:"Armatures",   nom:"Fer à béton ø20",                        stock:3, note:""},
   // MÉTALLERIE
-  {cat:"Métallerie",nom:"Platine base",unite:"unités",stock:3,seuil:5,note:"250 platines — cmdr si besoin"},
-  {cat:"Métallerie",nom:"Platine T",unite:"unités",stock:4,seuil:5,note:"140 pletinas en production"},
+  {cat:"Métallerie",  nom:"Platine base",                            stock:3, note:"250 platines en stock"},
+  {cat:"Métallerie",  nom:"Platine T",                               stock:4, note:"140 pletinas + production"},
   // FINITIONS
-  {cat:"Finitions",nom:"Carreaux rouges 24x12cm",unite:"paquets",stock:4,seuil:3,note:"417 paquets = 300m2"},
-  {cat:"Finitions",nom:"Carreaux blancs 20x30cm (Agnamba)",unite:"paquets",stock:3,seuil:2,note:"9 paquets = 13.5m2"},
-  {cat:"Finitions",nom:"Peinture étanchéité poutres",unite:"pots",stock:2,seuil:2,note:"Cmdr 5 pots pour 508/504"},
-  {cat:"Finitions",nom:"Sika",unite:"unités",stock:1,seuil:2,note:"Cmdr pour poutres 507"},
+  {cat:"Finitions",   nom:"Carreaux rouges 24x12cm",                 stock:4, note:"417 paquets = 300m2"},
+  {cat:"Finitions",   nom:"Carreaux blancs 20x30cm — Agnamba",       stock:3, note:"9 paquets = 13.5m2"},
+  {cat:"Finitions",   nom:"Peinture étanchéité poutres",             stock:2, note:"Cmdr 5 pots pour 508/504"},
+  {cat:"Finitions",   nom:"Sika",                                    stock:1, note:"Cmdr pour poutres 507"},
   // DIVERS
-  {cat:"Divers",nom:"Paille (Atab)",unite:"lots",stock:5,seuil:3,note:"Cmdr confirmée par Eno le 01/04"},
+  {cat:"Divers",      nom:"Paille (Atab)",                           stock:5, note:"Commandé pour 506+508"},
 ];
+
+function dotStock(s){
+  // s = 0..5. 0 = épuisé (rouge), 1-2 = bas, 3 = moyen, 4-5 = bon
+  const MAX=5;
+  const col=s===0?'#e53935':s<=2?'#f57f17':s<=3?'#F5A623':s<=4?'#8bc34a':'#2e7d32';
+  const dots=Array.from({length:MAX},(_,i)=>{
+    const filled=i<s;
+    return `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:3px;background:${filled?col:'#eee'};border:1px solid ${filled?col:'#ddd'}"></span>`;
+  }).join('');
+  const lbl=s===0?'<span class="bdg bal">Commander</span>':s<=2?'<span class="bdg bwn">Stock bas</span>':s<=3?'<span class="bdg bwn" style="background:#fff8e1;color:#f57f17">Moyen</span>':'<span class="bdg bok">OK</span>';
+  return`<div style="display:flex;align-items:center;gap:8px;margin-top:4px">${dots}${lbl}</div>`;
+}
 
 function renderInventaire(){
   const cats=[...new Set(INVENTAIRE.map(i=>i.cat))];
   document.getElementById('inventaireLista').innerHTML=cats.map(cat=>{
     const items=INVENTAIRE.filter(i=>i.cat===cat);
-    return`<div style="margin-bottom:12px">
-      <div style="font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-left:2px">${cat}</div>
-      ${items.map(it=>{
-        const bas=it.stock<=it.seuil;
-        const zero=it.stock===0;
-        const bdg=zero?'bal':bas?'bwn':'bok';
-        const lbl=zero?'Commander':bas?'Stock bas':'OK';
-        return`<div class="card" style="padding:10px;margin-bottom:6px">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-            <div style="flex:1">
-              <div style="font-size:13px;color:#1a1a1a;font-weight:500">${it.nom}</div>
-              ${it.note?`<div style="font-size:10px;color:#bbb;margin-top:2px">${it.note}</div>`:''}
-            </div>
-            <div style="text-align:right;flex-shrink:0">
-              <div style="font-size:14px;font-weight:700;color:#1a1a1a">${it.stock} <span style="font-size:10px;color:#999;font-weight:400">${it.unite}</span></div>
-              <span class="bdg ${bdg}" style="margin-top:3px;display:inline-block">${lbl}</span>
-            </div>
+    return`<div style="margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;padding-left:2px">${cat}</div>
+      ${items.map(it=>`<div class="card" style="padding:10px 12px;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <div style="flex:1">
+            <div style="font-size:13px;color:#1a1a1a;font-weight:500">${it.nom}</div>
+            ${it.note?`<div style="font-size:10px;color:#bbb;margin-top:2px">${it.note}</div>`:''}
+            ${dotStock(it.stock)}
           </div>
-        </div>`;
-      }).join('')}
+          <div style="flex-shrink:0;text-align:right">
+            <div style="font-size:18px;font-weight:700;color:#1a1a1a">${it.stock}<span style="font-size:10px;color:#bbb;font-weight:400">/5</span></div>
+          </div>
+        </div>
+      </div>`).join('')}
     </div>`;
   }).join('');
 }
