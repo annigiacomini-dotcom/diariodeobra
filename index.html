@@ -302,77 +302,77 @@ function ini(n){return n.split(' ').filter(w=>w.length>1).slice(0,2).map(w=>w[0]
 let ESTADO={
   0:{
     personal:[
-      // ── PERSONNEL FIXE — alphabetical by last name ──────
-      {n:"Abacar Sambou",          r:"Béton",                        i:"AS", p:true,  st:false},
-      {n:"Abdoul A. Sambou",       r:"Béton",                        i:"AS", p:true,  st:false},
-      {n:"Abdoulaye Diatta",       r:"Coffrage",                     i:"AD", p:true,  st:false},
-      {n:"Abdoulaye Sambou",       r:"Surveillant",                  i:"AS", p:true,  st:false},
-      {n:"Abdoulaye T. Mane",      r:"Équipe",                       i:"AM", p:true,  st:false},
-      {n:"Abdourahmane Ndiaye",    r:"Équipe",                       i:"AN", p:true,  st:false},
-      {n:"Aliou Diatta",           r:"Équipe",                       i:"AD", p:true,  st:false},
-      {n:"Aliu Badou Sagna",       r:"Béton",                        i:"AS", p:true,  st:false},
-      {n:"Amala Diatta",           r:"Coffrage pentes",              i:"AD", p:true,  st:false},
-      {n:"Apolo Badji",            r:"Coffrage menuisier",           i:"AB", p:true,  st:false},
-      {n:"Babou Diatta",           r:"Équipe",                       i:"BD", p:true,  st:false},
-      {n:"Bakary Badji",           r:"Pisé",                         i:"BB", p:true,  st:false},
-      {n:"Bassirou Sane",          r:"Équipe",                       i:"BS", p:true,  st:false},
-      {n:"Bathie Gning",           r:"Béton",                        i:"BG", p:true,  st:false},
-      {n:"Bouba Car",              r:"Béton",                        i:"BC", p:true,  st:false},
-      {n:"Cheikh T. Diatta",       r:"Équipe",                       i:"CD", p:true,  st:false},
-      {n:"Cherif Badji",           r:"Équipe",                       i:"CB", p:true,  st:false},
-      {n:"Dembo Sane",             r:"Équipe",                       i:"DS", p:true,  st:false},
-      {n:"Djiby Diatta",           r:"Surveillant",                  i:"DD", p:true,  st:false},
-      {n:"Doudou Sadio",           r:"Pisé",                         i:"DS", p:true,  st:false},
-      {n:"Eno Niassy",             r:"Chef du chantier",             i:"EN", p:true,  st:false},
-      {n:"Famara Badji",           r:"Équipe",                       i:"FB", p:true,  st:false},
-      {n:"Ibrahima Diane",         r:"Équipe",                       i:"ID", p:true,  st:false},
-      {n:"Ibrahima Diatta",        r:"Chef du coffrage de pisé",     i:"ID", p:true,  st:false},
-      {n:"Ibrahima Djiba",         r:"Chef du coffrage",             i:"ID", p:true,  st:false},
-      {n:"Idrissa Camara",         r:"Équipe",                       i:"IC", p:true,  st:false},
-      {n:"Idrissa Diatta",         r:"Assistant ENO / Surveillant",  i:"ID", p:true,  st:false},
-      {n:"Ilimane Sambou",         r:"Chef de pisé",                 i:"IS", p:true,  st:false},
-      {n:"Issa M. Sambou",         r:"Équipe",                       i:"IS", p:true,  st:false},
-      {n:"Jacob Sambou",           r:"Pisé",                         i:"JS", p:true,  st:false},
-      {n:"Keba Badji",             r:"Chef ferraillage (instala)",   i:"KB", p:true,  st:false},
-      {n:"Lamine Djiba",           r:"Coffrage",                     i:"LD", p:true,  st:false},
-      {n:"Lansana A. Sambou",      r:"Équipe",                       i:"LS", p:true,  st:false},
-      {n:"Malang Koly",            r:"Équipe",                       i:"MK", p:true,  st:false},
-      {n:"Mamadou A. Djiba",       r:"Équipe",                       i:"MD", p:true,  st:false},
-      {n:"Mamadou Diatta",         r:"Chef fondation / coffrage",    i:"MD", p:true,  st:false},
-      {n:"Mamadou E. Sambou",      r:"Équipe",                       i:"MS", p:true,  st:false},
-      {n:"Mamadou N. Diatta",      r:"Béton",                        i:"MD", p:true,  st:false},
-      {n:"Mamadou Sambou",         r:"Coffrage",                     i:"MS", p:true,  st:false},
-      {n:"Mamina Diedhiou",        r:"Équipe",                       i:"MD", p:true,  st:false},
-      {n:"Matar Badji",            r:"Équipe",                       i:"MB", p:true,  st:false},
-      {n:"Moussa Badji",           r:"Équipe",                       i:"MB", p:true,  st:false},
-      {n:"Moustapha Badji",        r:"Chef du béton",                i:"MB", p:true,  st:false},
-      {n:"Nassirou Diatta",        r:"Béton",                        i:"ND", p:true,  st:false},
-      {n:"Ndiaga Sane",            r:"Équipe",                       i:"NS", p:true,  st:false},
-      {n:"Nfaly Dieme",            r:"Coffrage",                     i:"ND", p:true,  st:false},
-      {n:"Nouha Mane",             r:"Chef ferraillage (dobla)",     i:"NM", p:true,  st:false},
-      {n:"Oumar Diatta Sagna",     r:"Équipe",                       i:"OD", p:true,  st:false},
-      {n:"Ousmane Badji",          r:"Équipe",                       i:"OB", p:true,  st:false},
-      {n:"Ousmane Djiba",          r:"Équipe",                       i:"OD", p:true,  st:false},
-      {n:"Ousmane L. Badji",       r:"Équipe",                       i:"OB", p:true,  st:false},
-      {n:"Pah T. Sambou",          r:"Équipe",                       i:"PS", p:true,  st:false},
-      {n:"Sidya Camara",           r:"Échafaudage",                  i:"SC", p:true,  st:false},
-      {n:"Soriaibou Z. Diatta",    r:"Équipe",                       i:"SD", p:true,  st:false},
-      {n:"Souleymane Djiba",       r:"Surveillant",                  i:"SD", p:true,  st:false},
-      {n:"Souleymane Sambou",      r:"Béton",                        i:"SS", p:true,  st:false},
-      {n:"Souleyman Niassy",       r:"Pisé",                         i:"SN", p:true,  st:false},
-      {n:"Yancouba Sadio",         r:"Coffrage",                     i:"YS", p:true,  st:false},
-      {n:"Yaya Diatta",            r:"Coffrage",                     i:"YD", p:true,  st:false},
-      {n:"Yaya Sambou",            r:"Coffrage",                     i:"YS", p:true,  st:false},
-      {n:"Younoussa Diatta",       r:"Béton",                        i:"YD", p:true,  st:false},
-      {n:"Zem Diatta",             r:"Béton",                        i:"ZD", p:true,  st:false},
+      // ── PERSONNEL FIXE — Nom de famille PRÉNOM ──────────
+      {n:"Badji Apolo",            r:"Coffrage menuisier",           i:"BA", p:true,  st:false},
+      {n:"Badji Bakary",           r:"Pisé",                         i:"BB", p:true,  st:false},
+      {n:"Badji Cherif",           r:"Équipe",                       i:"BC", p:true,  st:false},
+      {n:"Badji Famara",           r:"Équipe",                       i:"BF", p:true,  st:false},
+      {n:"Badji Keba",             r:"Chef ferraillage (instala)",   i:"BK", p:true,  st:false},
+      {n:"Badji Matar",            r:"Équipe",                       i:"BM", p:true,  st:false},
+      {n:"Badji Moussa",           r:"Équipe",                       i:"BM", p:true,  st:false},
+      {n:"Badji Moustapha",        r:"Chef du béton",                i:"BM", p:true,  st:false},
+      {n:"Badji Ousmane",          r:"Équipe",                       i:"BO", p:true,  st:false},
+      {n:"Badji Ousmane L.",       r:"Équipe",                       i:"BO", p:true,  st:false},
+      {n:"Car Bouba",              r:"Béton",                        i:"CB", p:true,  st:false},
+      {n:"Camara Idrissa",         r:"Équipe",                       i:"CI", p:true,  st:false},
+      {n:"Diatta Abdoulaye",       r:"Coffrage",                     i:"DA", p:true,  st:false},
+      {n:"Diatta Aliou",           r:"Équipe",                       i:"DA", p:true,  st:false},
+      {n:"Diatta Amala",           r:"Coffrage pentes",              i:"DA", p:true,  st:false},
+      {n:"Diatta Babou",           r:"Équipe",                       i:"DB", p:true,  st:false},
+      {n:"Diatta Cheikh T.",       r:"Équipe",                       i:"DC", p:true,  st:false},
+      {n:"Diatta Djiby",           r:"Surveillant",                  i:"DD", p:true,  st:false},
+      {n:"Diatta Ibrahima",        r:"Chef coffrage de pisé",        i:"DI", p:true,  st:false},
+      {n:"Diatta Idrissa",         r:"Assistant ENO / Surveillant",  i:"DI", p:true,  st:false},
+      {n:"Diatta Mamadou",         r:"Chef fondation / coffrage",    i:"DM", p:true,  st:false},
+      {n:"Diatta Mamadou N.",      r:"Béton",                        i:"DM", p:true,  st:false},
+      {n:"Diatta Nassirou",        r:"Béton",                        i:"DN", p:true,  st:false},
+      {n:"Diatta Soriaibou Z.",    r:"Équipe",                       i:"DS", p:true,  st:false},
+      {n:"Diatta Yaya",            r:"Coffrage",                     i:"DY", p:true,  st:false},
+      {n:"Diatta Younoussa",       r:"Béton",                        i:"DY", p:true,  st:false},
+      {n:"Diatta Zem",             r:"Béton",                        i:"DZ", p:true,  st:false},
+      {n:"Diane Ibrahima",         r:"Équipe",                       i:"DI", p:true,  st:false},
+      {n:"Diedhiou Mamina",        r:"Équipe",                       i:"DM", p:true,  st:false},
+      {n:"Dieme Nfaly",            r:"Coffrage",                     i:"DN", p:true,  st:false},
+      {n:"Djiba Ibrahima",         r:"Chef du coffrage",             i:"DI", p:true,  st:false},
+      {n:"Djiba Lamine",           r:"Coffrage",                     i:"DL", p:true,  st:false},
+      {n:"Djiba Mamadou A.",       r:"Équipe",                       i:"DM", p:true,  st:false},
+      {n:"Djiba Ousmane",          r:"Équipe",                       i:"DO", p:true,  st:false},
+      {n:"Djiba Souleymane",       r:"Surveillant",                  i:"DS", p:true,  st:false},
+      {n:"Gning Bathie",           r:"Béton",                        i:"GB", p:true,  st:false},
+      {n:"Koly Malang",            r:"Équipe",                       i:"KM", p:true,  st:false},
+      {n:"Mane Abdoulaye T.",      r:"Équipe",                       i:"MA", p:true,  st:false},
+      {n:"Mane Nouha",             r:"Chef ferraillage (dobla)",     i:"MN", p:true,  st:false},
+      {n:"Ndiaye Abdourahmane",    r:"Équipe",                       i:"NA", p:true,  st:false},
+      {n:"Niassy Eno",             r:"Chef du chantier",             i:"NE", p:true,  st:false},
+      {n:"Niassy Souleyman",       r:"Pisé",                         i:"NS", p:true,  st:false},
+      {n:"Sadio Doudou",           r:"Pisé",                         i:"SD", p:true,  st:false},
+      {n:"Sadio Yancouba",         r:"Coffrage",                     i:"SY", p:true,  st:false},
+      {n:"Sagna Aliu Badou",       r:"Béton",                        i:"SA", p:true,  st:false},
+      {n:"Sagna Oumar Diatta",     r:"Équipe",                       i:"SO", p:true,  st:false},
+      {n:"Sambou Abacar",          r:"Béton",                        i:"SA", p:true,  st:false},
+      {n:"Sambou Abdoul A.",       r:"Béton",                        i:"SA", p:true,  st:false},
+      {n:"Sambou Abdoulaye",       r:"Surveillant",                  i:"SA", p:true,  st:false},
+      {n:"Sambou Ilimane",         r:"Chef de pisé",                 i:"SI", p:true,  st:false},
+      {n:"Sambou Issa M.",         r:"Équipe",                       i:"SI", p:true,  st:false},
+      {n:"Sambou Jacob",           r:"Pisé",                         i:"SJ", p:true,  st:false},
+      {n:"Sambou Lansana A.",      r:"Équipe",                       i:"SL", p:true,  st:false},
+      {n:"Sambou Mamadou E.",      r:"Équipe",                       i:"SM", p:true,  st:false},
+      {n:"Sambou Mamadou",         r:"Coffrage",                     i:"SM", p:true,  st:false},
+      {n:"Sambou Pah T.",          r:"Équipe",                       i:"SP", p:true,  st:false},
+      {n:"Sambou Souleymane",      r:"Béton",                        i:"SS", p:true,  st:false},
+      {n:"Sambou Yaya",            r:"Coffrage",                     i:"SY", p:true,  st:false},
+      {n:"Sane Bassirou",          r:"Équipe",                       i:"SB", p:true,  st:false},
+      {n:"Sane Dembo",             r:"Équipe",                       i:"SD", p:true,  st:false},
+      {n:"Sane Ndiaga",            r:"Équipe",                       i:"SN", p:true,  st:false},
+      {n:"Camara Sidya",           r:"Échafaudage",                  i:"CS", p:true,  st:false},
       // ── SOUS-TRAITANTS ───────────────────────────────────
-      {n:"Affang Sambou",          r:"Électricité",                  i:"AF", p:true,  st:true},
-      {n:"Aliu Busko Sagna",       r:"Soudures platine",             i:"AB", p:true,  st:true},
+      {n:"Sambou Affang",          r:"Électricité",                  i:"SA", p:true,  st:true},
+      {n:"Sagna Aliu Busko",       r:"Soudures platine",             i:"SA", p:true,  st:true},
       {n:"Apa",                    r:"Carrelage",                    i:"AP", p:true,  st:true},
       {n:"Atab",                   r:"Paille",                       i:"AT", p:true,  st:true},
       {n:"Bekanya",                r:"Plombier",                     i:"BK", p:true,  st:true},
       {n:"Issah",                  r:"Soudures",                     i:"IS", p:true,  st:true},
-      {n:"Lamine Sambou",          r:"Menuisier",                    i:"LS", p:true,  st:true},
+      {n:"Sambou Lamine",          r:"Menuisier",                    i:"SL", p:true,  st:true},
       {n:"Pape + Femmes",          r:"Peinture",                     i:"PF", p:true,  st:true},
     ],
     pedidos:[],
@@ -659,11 +659,7 @@ function renderPersonal(){
   const tous=ESTADO[obraIdx].personal;
   const filtre=personalTab==='st';
   const query=(document.getElementById('buscarPersonal')?.value||'').toLowerCase().trim();
-  const liste=tous.filter(p=>p.st===filtre&&(query===''||p.n.toLowerCase().includes(query)||p.r.toLowerCase().includes(query))).sort((a,b)=>{
-    // Extract last name: last word that is not an initial (length > 1)
-    const lastName=n=>n.trim().split(' ').filter(w=>w.length>1).pop()||n;
-    return lastName(a.n).localeCompare(lastName(b.n),'fr');
-  });
+  const liste=tous.filter(p=>p.st===filtre&&(query===''||p.n.toLowerCase().includes(query)||p.r.toLowerCase().includes(query))).sort((a,b)=>a.n.localeCompare(b.n,'fr'));
   // Counters always use full staff list (not sous-traitants)
   const staff=tous.filter(p=>!p.st);
   const pres=staff.filter(p=>p.p).length;
@@ -1025,20 +1021,35 @@ function renderInventaire(){
     const items=INVENTAIRE.filter(i=>i.cat===cat);
     return`<div style="margin-bottom:14px">
       <div style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;padding-left:2px">${cat}</div>
-      ${items.map(it=>`<div class="card" style="padding:10px 12px;margin-bottom:6px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-          <div style="flex:1">
-            <div style="font-size:13px;color:#1a1a1a;font-weight:500">${it.nom}</div>
-            ${it.note?`<div style="font-size:10px;color:#bbb;margin-top:2px">${it.note}</div>`:''}
-            ${dotStock(it.stock)}
+      ${items.map((it,ii)=>{
+        const idx=INVENTAIRE.indexOf(it);
+        const s=it.stock;
+        const col=s===0?'#e53935':s<=2?'#f57f17':s<=3?'#F5A623':s<=4?'#8bc34a':'#2e7d32';
+        const dots=Array.from({length:5},(_,j)=>`<span style="display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:2px;background:${j<s?col:'#eee'};border:1px solid ${j<s?col:'#ddd'}"></span>`).join('');
+        const needsCmd=s<=2;
+        return`<div class="card" style="padding:10px 12px;margin-bottom:6px">
+          <div style="font-size:13px;color:#1a1a1a;font-weight:500;margin-bottom:3px">${it.nom}</div>
+          ${it.note?`<div style="font-size:10px;color:#bbb;margin-bottom:6px">${it.note}</div>`:''}
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <div style="display:flex;align-items:center;gap:2px">${dots}</div>
+            <button onclick="commanderMateriau(${idx})" style="flex-shrink:0;padding:5px 10px;border-radius:6px;border:1px solid ${needsCmd?'#e53935':'#ddd'};background:${needsCmd?'#fce4ec':'#f9f9f9'};color:${needsCmd?'#c62828':'#999'};font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px">
+              <i class="ti ti-shopping-cart" style="font-size:12px"></i>Commander
+            </button>
           </div>
-          <div style="flex-shrink:0;text-align:right">
-            <div style="font-size:18px;font-weight:700;color:#1a1a1a">${it.stock}<span style="font-size:10px;color:#bbb;font-weight:400">/5</span></div>
-          </div>
-        </div>
-      </div>`).join('')}
+        </div>`;
+      }).join('')}
     </div>`;
   }).join('');
+}
+
+function commanderMateriau(idx){
+  const it=INVENTAIRE[idx];
+  // Pre-fill modal and open it
+  document.getElementById('mpNombre').value=it.nom;
+  document.getElementById('mpCantidad').value='';
+  document.getElementById('mpProveedor').value='';
+  document.getElementById('mpEstado').value='urg';
+  abrirModal('modalPedido');
 }
 
 // ── HISTORIQUE — localStorage ─────────────────────────────
