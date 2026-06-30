@@ -723,7 +723,7 @@ function renderEquipos(){
           </div>
           <button class="trash-btn" onclick="eliminarEquipo(${i})"><i class="ti ti-trash"></i></button>
         </div>
-        ${esAlert?`<div class="eq-nota">${e.nota?('🔧 '+e.nota):'<em style="color:#bbb">Aucune note — qu\\'est-ce qui manque ?</em>'}</div>`:''}
+        ${esAlert?`<div class="eq-nota">${e.nota?('🔧 '+e.nota):'<em style="color:#bbb">Aucune note — que manque-t-il ?</em>'}</div>`:''}
         <div class="eq-actions">
           ${esAlert
             ?`<button class="eq-btn ok" onclick="marcarEquipo(${i},'ok')"><i class="ti ti-check"></i>Marquer opérationnel</button>
