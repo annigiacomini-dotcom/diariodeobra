@@ -74,9 +74,17 @@ input[type=file]{display:none}
 .ped-btn.recibido{border-color:#c8e6c9;background:#e8f5e9;color:#2e7d32}
 .ped-btn.anular{border-color:#ffcdd2;background:#fce4ec;color:#c62828}
 .ped-foto-preview{width:100%;margin-top:8px;border-radius:6px;object-fit:cover;max-height:120px;cursor:pointer}
-.eq-item{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid #f0f0f0}
-.eq-item:last-child{border-bottom:none}
+.eq-item{padding:11px;background:#fff;border-radius:10px;margin-bottom:8px;border-left:3px solid #43a047;border-top:1px solid #eee;border-right:1px solid #eee;border-bottom:1px solid #eee}
+.eq-item.alert{border-left-color:#e53935}
+.eq-head{display:flex;align-items:center;gap:9px}
 .eq-icon{width:38px;height:38px;background:#FFF3E0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#F5A623;flex-shrink:0}
+.eq-name{font-size:13px;color:#1a1a1a;font-weight:600}
+.eq-state{font-size:10px;color:#999;margin-top:1px}
+.eq-nota{font-size:11px;color:#777;background:#fef6f5;border-radius:6px;padding:6px 8px;margin-top:8px;line-height:1.4}
+.eq-actions{display:flex;gap:6px;margin-top:8px}
+.eq-btn{flex:1;padding:6px;border-radius:6px;border:1px solid #eee;background:#f9f9f9;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;color:#555}
+.eq-btn.ok{border-color:#c8e6c9;background:#e8f5e9;color:#2e7d32}
+.eq-btn.alert{border-color:#ffcdd2;background:#fce4ec;color:#c62828}
 .hora-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;scrollbar-width:none}
 .hora-row::-webkit-scrollbar{display:none}
 .hslot{flex-shrink:0;background:#fff;border-radius:8px;padding:8px 10px;text-align:center;border:1px solid #eee;min-width:52px}
@@ -149,20 +157,20 @@ input[type=file]{display:none}
     </div>
   </div>
 </div>
- 
+
 <nav class="nav">
   <button class="nb active" onclick="tab('clima',this)"><i class="ti ti-cloud-sun"></i>Météo</button>
   <button class="nb" onclick="tab('diario',this)"><i class="ti ti-camera"></i>Journal</button>
   <button class="nb" onclick="tab('materiales',this)"><i class="ti ti-package"></i>Matériaux</button>
-  <button class="nb" onclick="tab('personal',this)"><i class="ti ti-users"></i>Personnel</button>
   <button class="nb" onclick="tab('equipos',this)"><i class="ti ti-crane"></i>Engins</button>
+  <button class="nb" onclick="tab('personal',this)"><i class="ti ti-users"></i>Personnel</button>
 </nav>
- 
+
 <div class="content">
   <div id="tab-clima" class="tab vis">
     <div id="climaContent"><div class="loading-clima"><i class="ti ti-loader" style="font-size:28px;color:#F5A623"></i>Chargement météo...</div></div>
   </div>
- 
+
   <div id="tab-diario" class="tab">
     <p class="stitle"><i class="ti ti-camera"></i>Photos du jour</p>
     <div class="foto-grid" id="fotoGrid"></div>
@@ -177,7 +185,7 @@ input[type=file]{display:none}
     <p class="stitle"><i class="ti ti-history"></i>Historique</p>
     <div id="historialLista"></div>
   </div>
- 
+
   <div id="tab-materiales" class="tab">
     <button class="btn-primary" onclick="abrirModal('modalPedido')"><i class="ti ti-plus"></i>Nouvelle commande</button>
     <p class="stitle"><i class="ti ti-package"></i>Commandes en cours</p>
@@ -186,7 +194,7 @@ input[type=file]{display:none}
     <p class="stitle"><i class="ti ti-stack"></i>Inventaire Bajankusor</p>
     <div id="inventaireLista"></div>
   </div>
- 
+
   <div id="tab-personal" class="tab">
     <div class="pres-sum">
       <div class="ps-card ok"><div class="ps-num" id="cntPres">0</div><div class="ps-lbl">Présents</div></div>
@@ -202,21 +210,21 @@ input[type=file]{display:none}
     <p class="stitle"><i class="ti ti-users"></i><span id="personalTabTitle">Personnel fixe</span></p>
     <div class="card" id="personalLista"></div>
   </div>
- 
+
   <div id="tab-equipos" class="tab">
     <button class="btn-primary" onclick="abrirModal('modalEquipo')"><i class="ti ti-plus"></i>Ajouter un engin</button>
     <p class="stitle"><i class="ti ti-crane"></i>Engins sur chantier</p>
-    <div class="card" id="equiposLista"></div>
+    <div id="equiposLista"></div>
   </div>
 </div>
 </div>
- 
+
 <!-- PDF loading overlay -->
 <div class="pdf-loading" id="pdfLoading">
   <div class="spin">⏳</div>
   <div>Génération du PDF en cours...</div>
 </div>
- 
+
 <!-- MODALES -->
 <div class="modal-bg" id="modalPedido">
   <div class="modal">
@@ -252,8 +260,7 @@ input[type=file]{display:none}
     <input class="inp" id="meNombre" placeholder="Nom de l'engin">
     <select class="inp" id="meEstado">
       <option value="ok">Opérationnel</option>
-      <option value="warn">En service</option>
-      <option value="alert">En panne / Réparation</option>
+      <option value="alert">En réparation</option>
     </select>
     <button class="btn-primary" onclick="agregarEquipo()"><i class="ti ti-check"></i>Ajouter</button>
   </div>
@@ -266,7 +273,7 @@ input[type=file]{display:none}
     <div id="modalHistContenido"></div>
   </div>
 </div>
- 
+
 <script>
 const OBRAS=[
   {nombre:"Bajankusor — Thionck Essyl",lat:12.7599,lon:-16.0797},
@@ -277,7 +284,7 @@ const JOURS=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 const JOURS_C=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
 const MOIS=["jan","fév","mar","avr","mai","juin","juil","août","sep","oct","nov","déc"];
 const MOIS_L=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
- 
+
 let obraIdx=0;
 let fechaActual=new Date(); fechaActual.setHours(0,0,0,0);
 const hoy=new Date(); hoy.setHours(0,0,0,0);
@@ -286,7 +293,7 @@ let climaCache={};
 let fotoSlotIdx=null;
 let lastClimaData=null;
 let pedidoFotoIdx=null;
- 
+
 // Personnel tab state: 'staff' or 'st' (sous-traitants)
 let personalTab='staff';
 function switchPersonalTab(t){
@@ -296,9 +303,9 @@ function switchPersonalTab(t){
   document.getElementById('personalTabTitle').textContent=t==='staff'?'Personnel fixe':'Sous-traitants';
   renderPersonal();
 }
- 
+
 function ini(n){return n.split(' ').filter(w=>w.length>1).slice(0,2).map(w=>w[0].toUpperCase()).join('')}
- 
+
 let ESTADO={
   0:{
     personal:[
@@ -377,24 +384,24 @@ let ESTADO={
     ],
     pedidos:[],
     equipos:[
-      {nombre:"Bétonnière jeune",estado:"ok"},
-      {nombre:"Bétonnière verte",estado:"ok"},
+      {nombre:"Bétonnière jeune",estado:"ok",nota:""},
+      {nombre:"Bétonnière verte",estado:"ok",nota:""},
     ],
     fotos:{},notas:{}
   },
   1:{
     personal:[{n:"Aliou Camara",r:"Chef de chantier",i:"AC",p:true},{n:"Serigne Mbaye",r:"Maçon",i:"SM",p:false}],
     pedidos:[{nombre:"Blocs de béton",cantidad:"500 u",proveedor:"Béton Plus",estado:"transit",foto:null}],
-    equipos:[{nombre:"Petite bétonnière",estado:"ok"}],
+    equipos:[{nombre:"Petite bétonnière",estado:"ok",nota:""}],
     fotos:{},notas:{}
   },
   2:{
     personal:[{n:"Moussa Diallo",r:"Électricien",i:"MD",p:true}],
-    pedidos:[],equipos:[{nombre:"Échelle aluminium",estado:"ok"}],
+    pedidos:[],equipos:[{nombre:"Échelle aluminium",estado:"ok",nota:""}],
     fotos:{},notas:{}
   }
 };
- 
+
 function fechaKey(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 function fmtFecha(d){
   const esHoy=d.getTime()===hoy.getTime();
@@ -427,11 +434,11 @@ function cambiarObra(){
   obraIdx=parseInt(document.getElementById('obraSelect').value);
   climaCache={};lastClimaData=null;fetchClima();renderTabActual();
 }
- 
+
 // ── MÉTÉO ─────────────────────────────────────────────────
 function wmoIcon(c){if(c===0)return'ti-sun';if(c<=2)return'ti-cloud-sun';if(c<=3)return'ti-cloud';if(c<=49)return'ti-cloud-fog';if(c<=67)return'ti-cloud-rain';if(c<=77)return'ti-snowflake';return'ti-cloud-storm'}
 function wmoDesc(c){if(c===0)return'Ensoleillé';if(c<=2)return'Peu nuageux';if(c<=3)return'Nuageux';if(c<=49)return'Brouillard';if(c<=67)return'Pluie';if(c<=77)return'Neige';return'Orage'}
- 
+
 async function fetchClima(){
   const obra=OBRAS[obraIdx];
   const key=obraIdx+'_'+fechaKey(fechaActual);
@@ -448,7 +455,7 @@ async function fetchClima(){
     document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-wifi-off" style="font-size:28px;color:#ccc"></i>Pas de connexion</div>';
   }
 }
- 
+
 function renderClimaData(d){
   lastClimaData=d;
   const cw=d.current_weather;
@@ -504,7 +511,7 @@ function renderClimaData(d){
     <div class="csub" style="margin-top:5px">${maxLluvia>70?'Évaluer la suspension des travaux en hauteur ou du bétonnage.':'Température et vent dans les plages normales de travail.'}</div></div>`;
 }
 function renderClima(){fetchClima()}
- 
+
 // ── JOURNAL ───────────────────────────────────────────────
 function renderDiario(){
   const fk=fechaKey(fechaActual);
@@ -527,7 +534,7 @@ function renderDiario(){
         <div class="hist-stats"><span class="hist-stat"><i class="ti ti-camera" style="font-size:11px"></i>${fCnt} photo(s)</span></div>
       </div>`;}).join('');
 }
- 
+
 // Key fix: no capture attribute on the input → iOS shows "Take Photo" OR "Choose from Library"
 function abrirGaleria(idx){
   fotoSlotIdx=idx;
@@ -535,7 +542,7 @@ function abrirGaleria(idx){
   fi.onchange=onFotoSelected;
   fi.click();
 }
- 
+
 function onFotoSelected(e){
   const file=e.target.files[0];
   if(!file||fotoSlotIdx===null)return;
@@ -564,7 +571,7 @@ function onFotoSelected(e){
   };
   img.src=url;
 }
- 
+
 function eliminarFoto(i){
   if(confirm('Supprimer cette photo ?')){
     ESTADO[obraIdx].fotos[fechaKey(fechaActual)][i]=null;
@@ -592,7 +599,7 @@ function verHistorial(k){
     </div>`;
   abrirModal('modalHist');
 }
- 
+
 // ── MATÉRIAUX ─────────────────────────────────────────────
 function renderMateriales(){
   const peds=ESTADO[obraIdx].pedidos;
@@ -618,7 +625,7 @@ function renderMateriales(){
     </div>`;
   }).join('');
 }
- 
+
 function pedidoFoto(i){
   pedidoFotoIdx=i;fotoSlotIdx=null;
   const fi=document.getElementById('fileInput');
@@ -626,12 +633,14 @@ function pedidoFoto(i){
     const file=e.target.files[0];if(!file)return;
     const img=new Image();const url=URL.createObjectURL(file);
     img.onload=function(){
-      const MAX=800;let w=img.width,h=img.height;
+      const MAX=600;let w=img.width,h=img.height;
       if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
       const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
       canvas.getContext('2d').drawImage(img,0,0,w,h);
-      ESTADO[obraIdx].pedidos[pedidoFotoIdx].foto=canvas.toDataURL('image/jpeg',0.8);
-      URL.revokeObjectURL(url);fi.onchange=onFotoSelected;e.target.value='';renderMateriales();
+      ESTADO[obraIdx].pedidos[pedidoFotoIdx].foto=canvas.toDataURL('image/jpeg',0.65);
+      URL.revokeObjectURL(url);fi.onchange=onFotoSelected;e.target.value='';
+      saveHistorique();
+      renderMateriales();
     };img.src=url;
   };
   fi.click();
@@ -653,7 +662,7 @@ function agregarPedido(){
   saveHistorique();
   renderMateriales();
 }
- 
+
 // ── PERSONNEL ─────────────────────────────────────────────
 function renderPersonal(){
   const tous=ESTADO[obraIdx].personal;
@@ -696,29 +705,57 @@ function agregarPersona(){
   renderPersonal();
 }
 function eliminarPersona(i){if(confirm('Supprimer cette personne ?')){ESTADO[obraIdx].personal.splice(i,1);renderPersonal();}}
- 
+
 // ── ENGINS ────────────────────────────────────────────────
-const EQ_ICONS={'Bétonnière':'ti-truck','Échafaudage tubulaire':'ti-ladder','Compresseur 200L':'ti-engine','Vibrateur à béton':'ti-tool','Grue à tour':'ti-crane','Petite bétonnière':'ti-truck','Échelle aluminium':'ti-ladder'};
+const EQ_ICONS={'Bétonnière':'ti-truck','Échafaudage tubulaire':'ti-ladder','Compresseur 200L':'ti-engine','Vibrateur à béton':'ti-tool','Grue à tour':'ti-crane','Petite bétonnière':'ti-truck','Échelle aluminium':'ti-ladder','Bétonnière jeune':'ti-truck','Bétonnière verte':'ti-truck'};
 function renderEquipos(){
   const eqs=ESTADO[obraIdx].equipos;
   document.getElementById('equiposLista').innerHTML=eqs.length===0
     ?'<div style="color:#bbb;font-size:12px;padding:8px 0">Aucun engin enregistré</div>'
-    :eqs.map((e,i)=>`<div class="eq-item">
-      <div class="eq-icon"><i class="ti ${EQ_ICONS[e.nombre]||'ti-tool'}"></i></div>
-      <div style="flex:1"><div style="font-size:13px;color:#1a1a1a;font-weight:500">${e.nombre}</div>
-      <div style="font-size:10px;color:#999">${{ok:'Opérationnel',warn:'En service',alert:'En panne / Réparation'}[e.estado]}</div></div>
-      <span class="bdg ${{ok:'bok',warn:'bwn',alert:'bal'}[e.estado]}">${{ok:'OK',warn:'En service',alert:'Panne'}[e.estado]}</span>
-      <button class="trash-btn" onclick="eliminarEquipo(${i})"><i class="ti ti-trash"></i></button>
-    </div>`).join('');
+    :eqs.map((e,i)=>{
+      const esAlert=e.estado==='alert';
+      return`<div class="eq-item ${esAlert?'alert':''}">
+        <div class="eq-head">
+          <div class="eq-icon"><i class="ti ${EQ_ICONS[e.nombre]||'ti-tool'}"></i></div>
+          <div style="flex:1">
+            <div class="eq-name">${e.nombre}</div>
+            <div class="eq-state">${esAlert?'En réparation':'Opérationnel'}</div>
+          </div>
+          <button class="trash-btn" onclick="eliminarEquipo(${i})"><i class="ti ti-trash"></i></button>
+        </div>
+        ${esAlert?`<div class="eq-nota">${e.nota?('🔧 '+e.nota):'<em style="color:#bbb">Aucune note — qu\\'est-ce qui manque ?</em>'}</div>`:''}
+        <div class="eq-actions">
+          ${esAlert
+            ?`<button class="eq-btn ok" onclick="marcarEquipo(${i},'ok')"><i class="ti ti-check"></i>Marquer opérationnel</button>
+               <button class="eq-btn" onclick="editarNotaEquipo(${i})"><i class="ti ti-pencil"></i>${e.nota?'Modifier note':'Ajouter note'}</button>`
+            :`<button class="eq-btn alert" onclick="marcarEquipo(${i},'alert')"><i class="ti ti-tool"></i>Marquer en réparation</button>`}
+        </div>
+      </div>`;
+    }).join('');
+}
+function marcarEquipo(i,estado){
+  ESTADO[obraIdx].equipos[i].estado=estado;
+  if(estado==='alert'&&!ESTADO[obraIdx].equipos[i].nota){
+    setTimeout(()=>editarNotaEquipo(i),150);
+  }
+  renderEquipos();
+}
+function editarNotaEquipo(i){
+  const actual=ESTADO[obraIdx].equipos[i].nota||'';
+  const txt=prompt("Qu'est-ce qui manque ou doit être réparé ?",actual);
+  if(txt!==null){
+    ESTADO[obraIdx].equipos[i].nota=txt.trim();
+    renderEquipos();
+  }
 }
 function agregarEquipo(){
   const n=document.getElementById('meNombre').value.trim();if(!n)return;
-  ESTADO[obraIdx].equipos.push({nombre:n,estado:document.getElementById('meEstado').value});
+  ESTADO[obraIdx].equipos.push({nombre:n,estado:document.getElementById('meEstado').value,nota:''});
   cerrarModal('modalEquipo');document.getElementById('meNombre').value='';
   renderEquipos();
 }
 function eliminarEquipo(i){if(confirm('Supprimer cet engin ?')){ESTADO[obraIdx].equipos.splice(i,1);renderEquipos();}}
- 
+
 // ── PDF avec jsPDF + images base64 ───────────────────────
 function getClimaInfo(){
   if(!lastClimaData)return{tMin:'--',tMax:'--',tMoy:'--',lluvia:'--',mm:'--',viento:'--',desc:'N/D'};
@@ -734,7 +771,7 @@ function getClimaInfo(){
     desc:wmoDesc(cw.weathercode)
   };
 }
- 
+
 async function exportarPDF(historique){
   const overlay=document.getElementById('pdfLoading');
   overlay.classList.add('vis');
@@ -744,7 +781,7 @@ async function exportarPDF(historique){
     const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     const est=ESTADO[obraIdx];
     const obra=OBRAS[obraIdx];
- 
+
     let fechas;
     if(historique){
       const todas=new Set([
@@ -767,13 +804,13 @@ async function exportarPDF(historique){
     } else {
       fechas=[fechaKey(fechaActual)];
     }
- 
+
     for(let fi=0;fi<fechas.length;fi++){
       const fk=fechas[fi];
       if(fi>0||historique) doc.addPage();
       await buildPDFPage(doc,obra,fk,est,!historique);
     }
- 
+
     const fname=historique
       ?'Historique_'+obra.nombre.replace(/[^a-zA-Z0-9]/g,'_')+'.pdf'
       :'Rapport_'+fechaKey(fechaActual)+'.pdf';
@@ -785,22 +822,22 @@ async function exportarPDF(historique){
     overlay.classList.remove('vis');
   }
 }
- 
+
 async function buildPDFPage(doc,obra,fk,est,inclClima){
   const W=210;
   const [yr,m,d]=fk.split('-');
   const fd=new Date(parseInt(yr),parseInt(m)-1,parseInt(d));
   const fechaStr=JOURS[fd.getDay()]+' '+fd.getDate()+' '+MOIS_L[fd.getMonth()]+' '+yr;
- 
+
   const amarillo=[245,166,35];
   const noir=[26,26,26];
   const gris=[100,100,100];
   const vertOk=[46,125,50];
   const rougeBad=[198,40,40];
   const orange=[230,81,0];
- 
+
   let y=0;
- 
+
   // Header band
   doc.setFillColor(...amarillo);doc.rect(0,0,W,30,'F');
   doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(...noir);
@@ -810,7 +847,7 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
   doc.setFont('helvetica','bold');doc.setFontSize(10);
   doc.text(fechaStr,W-14,20,{align:'right'});
   y=36;
- 
+
   // Météo block
   if(inclClima){
     const cl=getClimaInfo();
@@ -823,7 +860,7 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     doc.text(`Pluie: ${cl.lluvia} (${cl.mm})   Vent max: ${cl.viento}   ${cl.desc}`,90,y+13);
     y+=26;
   }
- 
+
   // Section helper
   const sec=(titre)=>{
     if(y>262){doc.addPage();y=14;}
@@ -832,20 +869,20 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     doc.text(titre.toUpperCase(),17,y+4.2);
     y+=10;doc.setTextColor(...noir);doc.setFont('helvetica','normal');doc.setFontSize(9.5);
   };
- 
+
   const lin=(txt,col)=>{
     if(y>270){doc.addPage();y=14;}
     doc.setTextColor(...(col||gris));doc.setFontSize(9.5);doc.setFont('helvetica','normal');
     const lines=doc.splitTextToSize(txt,W-32);
     doc.text(lines,17,y);y+=lines.length*5+1.5;
   };
- 
+
   // Note
   const nota=est.notas[fk];
   sec('Note du jour');
   lin(nota||'Sans note enregistrée', nota?noir:gris);
   y+=2;
- 
+
   // Photos — embed as real images in PDF
   const fotos=(est.fotos[fk]||[]).filter(Boolean);
   sec(`Photos du jour (${fotos.length})`);
@@ -872,7 +909,7 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     }
     y=fy+(fotos.length%PER_ROW!==0?FOTO_H+10:2);
   }
- 
+
   // Personnel — staff only for main section
   const staff=est.personal.filter(p=>!p.st);
   const sousTrait=est.personal.filter(p=>p.st&&p.p);
@@ -915,7 +952,7 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     });
   }
   y+=3;
- 
+
   // Commandes
   sec('Commandes et matériaux');
   if(est.pedidos.length===0){lin('Aucune commande active');}
@@ -942,37 +979,44 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     });
   }
   y+=2;
- 
+
   // Engins
   sec('Engins sur chantier');
   const eqs=est.equipos;
   if(eqs.length===0){lin('Aucun engin enregistré');}
   else{
-    eqs.forEach((e,i)=>{
-      const cx=17+(i%2)*colW;
-      if(i%2===0&&i>0)y+=6;
-      if(y>270){doc.addPage();y=14;}
-      const lbl={ok:'Opérationnel',warn:'En service',alert:'En panne'}[e.estado];
-      const col={ok:vertOk,warn:orange,alert:rougeBad}[e.estado];
+    eqs.forEach((e)=>{
+      if(y>265){doc.addPage();y=14;}
+      const esAlert=e.estado==='alert';
+      const lbl=esAlert?'En réparation':'Opérationnel';
+      const col=esAlert?rougeBad:vertOk;
       doc.setTextColor(...col);doc.setFontSize(8);doc.setFont('helvetica','bold');
-      doc.text({ok:'OK  ',warn:'USE ',alert:'PNE '}[e.estado],cx,y);
-      doc.setFont('helvetica','normal');doc.setTextColor(...noir);doc.setFontSize(9);doc.text(e.nombre,cx+10,y);
-      doc.setTextColor(...gris);doc.setFontSize(8);doc.text(lbl,cx+5,y+4);
-      if(i%2===1||i===eqs.length-1)y+=9;
+      doc.text(esAlert?'REP ':'OK  ',17,y);
+      doc.setFont('helvetica','normal');doc.setTextColor(...noir);doc.setFontSize(9.5);doc.text(e.nombre,30,y);
+      doc.setTextColor(...gris);doc.setFontSize(8);doc.text(lbl,30,y+4);
+      y+=esAlert&&e.nota?9:9;
+      if(esAlert&&e.nota){
+        if(y>270){doc.addPage();y=14;}
+        doc.setTextColor(...rougeBad);doc.setFontSize(8);doc.setFont('helvetica','italic');
+        const lines=doc.splitTextToSize('Manque: '+e.nota,W-44);
+        doc.text(lines,30,y);y+=lines.length*4.5+3;
+        doc.setFont('helvetica','normal');
+      }
     });
   }
- 
+
   // Footer
   y=Math.max(y+6,280);
   doc.setDrawColor(220,220,220);doc.setLineWidth(0.3);doc.line(14,y,W-14,y);
   doc.setFontSize(7);doc.setTextColor(180,180,180);
   doc.text('Journal de Chantier  ·  Généré le '+new Date().toLocaleString('fr-FR'),W/2,y+5,{align:'center'});
 }
- 
+
 // ── INVENTAIRE BAJANKUSOR — stock 1 à 5 ──────────────────
 const INVENTAIRE=[
   // GRANULATS
-  {cat:"Granulats",   nom:"Gravier basalte béton (Dakar)",         stock:0, note:"1 camion x 40m3 · à commander chaque semaine"},
+  {cat:"Granulats",   nom:"Gravier basalte béton ø3-8 — Dakar",     stock:0, note:"Petit calibre · 1 camion x 40m3 · à commander chaque semaine"},
+  {cat:"Granulats",   nom:"Gravier basalte béton ø8-16 — Dakar",    stock:0, note:"Gros calibre · 1 camion x 40m3 · à commander chaque semaine"},
   {cat:"Granulats",   nom:"Gravier Thionck — dalles / béton prop.", stock:4, note:"ø3-8"},
   {cat:"Granulats",   nom:"Gravier pisé (couleur claire)",          stock:2, note:"ø8-16"},
   {cat:"Granulats",   nom:"Sable blanc",                            stock:2, note:"1 camion x 16m3"},
@@ -1002,7 +1046,7 @@ const INVENTAIRE=[
   // DIVERS
   {cat:"Divers",      nom:"Paille (Atab)",                           stock:5, note:"Commandé pour 506+508"},
 ];
- 
+
 function dotStock(s){
   // s = 0..5. 0 = épuisé (rouge), 1-2 = bas, 3 = moyen, 4-5 = bon
   const MAX=5;
@@ -1014,7 +1058,7 @@ function dotStock(s){
   const lbl=s===0?'<span class="bdg bal">Commander</span>':s<=2?'<span class="bdg bwn">Stock bas</span>':s<=3?'<span class="bdg bwn" style="background:#fff8e1;color:#f57f17">Moyen</span>':'<span class="bdg bok">OK</span>';
   return`<div style="display:flex;align-items:center;gap:8px;margin-top:4px">${dots}${lbl}</div>`;
 }
- 
+
 function renderInventaire(){
   const cats=[...new Set(INVENTAIRE.map(i=>i.cat))];
   document.getElementById('inventaireLista').innerHTML=cats.map(cat=>{
@@ -1041,7 +1085,7 @@ function renderInventaire(){
     </div>`;
   }).join('');
 }
- 
+
 function commanderMateriau(idx){
   const it=INVENTAIRE[idx];
   // Pre-fill modal and open it
@@ -1051,10 +1095,10 @@ function commanderMateriau(idx){
   document.getElementById('mpEstado').value='urg';
   abrirModal('modalPedido');
 }
- 
+
 // ── HISTORIQUE — localStorage ─────────────────────────────
 const LS_KEY='chantier_hist_v1';
- 
+
 function saveHistorique(){
   try{
     const data={};
@@ -1069,13 +1113,13 @@ function saveHistorique(){
           data[oi].fotosHora[fk]=arr.map(f=>f?f.hora:null);
         }
       });
-      // Save pedido state (no photos)
-      data[oi].pedidosState=ESTADO[oi].pedidos.map(p=>({nombre:p.nombre,cantidad:p.cantidad,proveedor:p.proveedor,estado:p.estado}));
+      // Save pedido state — including photo (pedidos are few, unlike daily photos)
+      data[oi].pedidosState=ESTADO[oi].pedidos.map(p=>({nombre:p.nombre,cantidad:p.cantidad,proveedor:p.proveedor,estado:p.estado,foto:p.foto||null}));
     });
     localStorage.setItem(LS_KEY,JSON.stringify(data));
   }catch(e){console.warn('Save failed:',e);}
 }
- 
+
 function loadHistorique(){
   try{
     const raw=localStorage.getItem(LS_KEY);
@@ -1091,23 +1135,23 @@ function loadHistorique(){
         });
       }
       if(data[oi].pedidosState&&data[oi].pedidosState.length){
-        ESTADO[oi].pedidos=data[oi].pedidosState.map(p=>({...p,foto:null}));
+        ESTADO[oi].pedidos=data[oi].pedidosState.map(p=>({...p,foto:p.foto||null}));
       }
     });
   }catch(e){console.warn('Load failed:',e);}
 }
- 
+
 // ── MODALES ───────────────────────────────────────────────
 function abrirModal(id){document.getElementById(id).classList.add('vis')}
 function cerrarModal(id){document.getElementById(id).classList.remove('vis')}
 document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('vis')}));
- 
+
 // ── INIT ──────────────────────────────────────────────────
 loadHistorique();
 actualizarFecha();
 renderTabActual();
 fetchClima();
- 
+
 if('serviceWorker' in navigator){
   const sw=`const C='chantier-v4';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
