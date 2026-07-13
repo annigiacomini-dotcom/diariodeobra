@@ -907,30 +907,39 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
   if(fotos.length===0){
     lin('Aucune photo enregistrée');y+=2;
   } else {
-    // Use square cells — get real image dimensions to maintain aspect ratio
-    const CELL=52;const GAP=4;const PER_ROW=3;
-    let fx=17,fy=y;
+    // 2 photos per row, each photo fits inside its cell without overflowing
+    const USABLE=W-28; // 182mm usable width
+    const COLS=2;
+    const CELL_W=(USABLE-(COLS-1)*4)/COLS; // ~89mm each
+    const CELL_H=62; // fixed height per row, tall enough to look good
+    const GAP_X=4;const GAP_H=10;
+    let col=0,rowY=y;
+
     for(let i=0;i<fotos.length;i++){
-      if(fy+CELL>272){doc.addPage();fy=14;}
+      const fx=17+col*(CELL_W+GAP_X);
+      if(rowY+CELL_H>272){doc.addPage();rowY=14;}
       try{
         const imgData=fotos[i].src;
-        // Get image dimensions to crop correctly inside square cell
         const props=doc.getImageProperties(imgData);
         const iw=props.width,ih=props.height;
-        const scale=Math.max(CELL/iw,CELL/ih);
-        const sw=iw*scale,sh=ih*scale;
-        const ox=(CELL-sw)/2,oy=(CELL-sh)/2;
-        doc.addImage(imgData,'JPEG',fx+ox,fy+oy,sw,sh,undefined,'FAST');
+        // Scale to FIT inside cell (min = no overflow)
+        const scale=Math.min(CELL_W/iw,CELL_H/ih);
+        const dw=iw*scale,dh=ih*scale;
+        // Center inside cell
+        const ox=(CELL_W-dw)/2,oy=(CELL_H-dh)/2;
+        doc.addImage(imgData,'JPEG',fx+ox,rowY+oy,dw,dh,undefined,'FAST');
         doc.setFontSize(7);doc.setTextColor(...gris);
-        doc.text(fotos[i].hora,fx+CELL/2,fy+CELL+3.5,{align:'center'});
+        doc.text(fotos[i].hora,fx+CELL_W/2,rowY+CELL_H+3.5,{align:'center'});
       }catch(e){
-        doc.setFillColor(240,240,240);doc.rect(fx,fy,CELL,CELL,'F');
-        doc.setFontSize(7);doc.setTextColor(...gris);doc.text('Photo',fx+CELL/2,fy+CELL/2,{align:'center'});
+        doc.setFillColor(240,240,240);doc.rect(fx,rowY,CELL_W,CELL_H,'F');
+        doc.setFontSize(7);doc.setTextColor(...gris);
+        doc.text('Photo',fx+CELL_W/2,rowY+CELL_H/2,{align:'center'});
       }
-      fx+=CELL+GAP;
-      if((i+1)%PER_ROW===0){fx=17;fy+=CELL+8;}
+      col++;
+      if(col>=COLS){col=0;rowY+=CELL_H+GAP_H;}
     }
-    y=fy+(fotos.length%PER_ROW!==0?CELL+10:2);
+    // Advance y past the last row
+    y=rowY+(col>0?CELL_H+GAP_H:2);
   }
 
   // Commandes
