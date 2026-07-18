@@ -414,7 +414,7 @@ function actualizarFecha(){document.getElementById('fechaLbl').textContent=fmtFe
 function navFecha(dir){
   const nf=new Date(fechaActual);nf.setDate(nf.getDate()+dir);
   if(nf>hoy)return;
-  fechaActual=nf;actualizarFecha();renderTabActual();
+  fechaActual=nf;actualizarFecha();loadPresencesDay();renderTabActual();
 }
 function tab(id,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('vis'));
@@ -432,7 +432,7 @@ function renderTabActual(){
 }
 function cambiarObra(){
   obraIdx=parseInt(document.getElementById('obraSelect').value);
-  climaCache={};lastClimaData=null;fetchClima();renderTabActual();
+  climaCache={};lastClimaData=null;fetchClima();loadPresencesDay();renderTabActual();
 }
 
 // ── MÉTÉO ─────────────────────────────────────────────────
@@ -665,7 +665,6 @@ function agregarPedido(){
 
 // ── PERSONNEL ─────────────────────────────────────────────
 function renderPersonal(){
-  loadPresencesDay();
   const tous=ESTADO[obraIdx].personal;
   const filtre=personalTab==='st';
   const query=(document.getElementById('buscarPersonal')?.value||'').toLowerCase().trim();
@@ -1198,6 +1197,7 @@ document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',fun
 
 // ── INIT ──────────────────────────────────────────────────
 loadHistorique();
+loadPresencesDay();
 actualizarFecha();
 renderTabActual();
 fetchClima();
