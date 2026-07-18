@@ -439,53 +439,92 @@ function cambiarObra(){
 function wmoIcon(c){if(c===0)return'ti-sun';if(c<=2)return'ti-cloud-sun';if(c<=3)return'ti-cloud';if(c<=49)return'ti-cloud-fog';if(c<=67)return'ti-cloud-rain';if(c<=77)return'ti-snowflake';return'ti-cloud-storm'}
 function wmoDesc(c){if(c===0)return'Ensoleillé';if(c<=2)return'Peu nuageux';if(c<=3)return'Nuageux';if(c<=49)return'Brouillard';if(c<=67)return'Pluie';if(c<=77)return'Neige';return'Orage'}
 
+// Résumé compact d'une réponse Open-Meteo (forecast ou archive), pour affichage et pour être sauvegardé
+function resumenClima(d,esHoy){
+  const daily=d.daily;
+  if(!daily||!daily.temperature_2m_max)return null;
+  const wc=(esHoy&&d.current_weather)?d.current_weather.weathercode:(daily.weathercode?daily.weathercode[0]:0);
+  return{
+    tMin:Math.round(daily.temperature_2m_min[0]),
+    tMax:Math.round(daily.temperature_2m_max[0]),
+    tMoy:Math.round((daily.temperature_2m_max[0]+daily.temperature_2m_min[0])/2),
+    lluvia:daily.precipitation_probability_max?Math.round(daily.precipitation_probability_max[0]):null,
+    mm:Math.round((daily.precipitation_sum[0]||0)*10)/10,
+    viento:Math.round(daily.windspeed_10m_max[0]),
+    wc:wc
+  };
+}
+
 async function fetchClima(){
   const obra=OBRAS[obraIdx];
-  const key=obraIdx+'_'+fechaKey(fechaActual);
+  const fk=fechaKey(fechaActual);
+  const key=obraIdx+'_'+fk;
+  const esHoy=fechaActual.getTime()===hoy.getTime();
+  const est=ESTADO[obraIdx];
   document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-loader" style="font-size:28px;color:#F5A623"></i>Chargement météo...</div>';
   document.getElementById('miniTemp').textContent='--°';
   document.getElementById('miniDet').textContent='chargement...';
-  if(climaCache[key]){renderClimaData(climaCache[key]);return}
+  if(climaCache[key]){renderClimaData(climaCache[key],esHoy);return}
   try{
-    const url=`https://api.open-meteo.com/v1/forecast?latitude=${obra.lat}&longitude=${obra.lon}&hourly=temperature_2m,precipitation_probability,weathercode,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,windspeed_10m_max&current_weather=true&timezone=auto&forecast_days=1`;
-    const r=await fetch(url);
-    const d=await r.json();
-    climaCache[key]=d;lastClimaData=d;renderClimaData(d);
+    let d;
+    if(esHoy){
+      const url=`https://api.open-meteo.com/v1/forecast?latitude=${obra.lat}&longitude=${obra.lon}&hourly=temperature_2m,precipitation_probability,weathercode,windspeed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,windspeed_10m_max&current_weather=true&timezone=auto&forecast_days=1`;
+      const r=await fetch(url);d=await r.json();
+    } else {
+      const[yr,m,day]=fk.split('-');
+      const dateStr=yr+'-'+String(m).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+      const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${obra.lat}&longitude=${obra.lon}&start_date=${dateStr}&end_date=${dateStr}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weathercode&timezone=auto`;
+      const r=await fetch(url);d=await r.json();
+    }
+    if(d.error)throw new Error(d.reason||'Erreur météo');
+    climaCache[key]=d;renderClimaData(d,esHoy);
+    const res=resumenClima(d,esHoy);
+    if(res){
+      if(!est.climaDia)est.climaDia={};
+      est.climaDia[fk]=res;
+      saveHistorique();
+    }
   }catch(e){
-    document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-wifi-off" style="font-size:28px;color:#ccc"></i>Pas de connexion</div>';
+    // Hors ligne ou erreur : on retombe sur le résumé déjà enregistré pour ce jour, si dispo
+    if(est.climaDia&&est.climaDia[fk]){
+      renderClimaSummaryOnly(est.climaDia[fk]);
+    } else {
+      document.getElementById('climaContent').innerHTML='<div class="loading-clima"><i class="ti ti-wifi-off" style="font-size:28px;color:#ccc"></i>Pas de connexion</div>';
+    }
   }
 }
 
-function renderClimaData(d){
+function renderClimaData(d,esHoy){
   lastClimaData=d;
-  const cw=d.current_weather;
-  const temp=Math.round(cw.temperature);
-  const wind=Math.round(cw.windspeed);
-  const desc=wmoDesc(cw.weathercode);
+  const cw=esHoy?d.current_weather:null;
   const daily=d.daily;
   const tMax=daily?Math.round(daily.temperature_2m_max[0]):'--';
   const tMin=daily?Math.round(daily.temperature_2m_min[0]):'--';
   const tMoy=daily?Math.round((daily.temperature_2m_max[0]+daily.temperature_2m_min[0])/2):'--';
-  const pluvioMax=daily?Math.round(daily.precipitation_probability_max[0]):'--';
-  const pluvioMm=daily?(Math.round(daily.precipitation_sum[0]*10)/10):'--';
+  const pluvioMax=daily&&daily.precipitation_probability_max?Math.round(daily.precipitation_probability_max[0]):null;
+  const pluvioMm=daily?(Math.round((daily.precipitation_sum[0]||0)*10)/10):'--';
   const ventMax=daily?Math.round(daily.windspeed_10m_max[0]):'--';
+  const wc=cw?cw.weathercode:(daily&&daily.weathercode?daily.weathercode[0]:0);
+  const desc=wmoDesc(wc);
+  const temp=cw?Math.round(cw.temperature):tMoy;
+  const hasHourly=esHoy&&d.hourly&&d.hourly.time;
   const nowH=new Date().getHours();
-  const hours=d.hourly.time.map((t,i)=>({
+  const hours=hasHourly?d.hourly.time.map((t,i)=>({
     hora:t.split('T')[1].slice(0,5),
     h:parseInt(t.split('T')[1]),
     temp:Math.round(d.hourly.temperature_2m[i]),
     lluvia:d.hourly.precipitation_probability[i]||0,
     wc:d.hourly.weathercode[i]
-  })).filter((_,i)=>i%2===0);
-  const nowIdx=hours.findIndex(h=>h.h>=nowH);
+  })).filter((_,i)=>i%2===0):[];
+  const nowIdx=hasHourly?hours.findIndex(h=>h.h>=nowH):-1;
   const maxLluvia=typeof pluvioMax==='number'?pluvioMax:0;
   const alerta=maxLluvia>70
     ?`<span class="bdg bal">⚠ Pluie probable ${maxLluvia}% — ${pluvioMm}mm attendus</span>`
     :`<span class="bdg bok">✓ Conditions favorables pour le travail</span>`;
   document.getElementById('miniTemp').textContent=temp+'°';
-  document.getElementById('miniDet').textContent=desc;
+  document.getElementById('miniDet').textContent=desc+(esHoy?'':' (historique)');
   document.getElementById('climaContent').innerHTML=`
-    <p class="stitle"><i class="ti ti-cloud-sun"></i>Résumé du jour — Thionck Essyl</p>
+    <p class="stitle"><i class="ti ti-cloud-sun"></i>${esHoy?'Résumé du jour':'Données historiques'} — Thionck Essyl</p>
     <div class="clima-resumen">
       <div class="clima-resumen-title">Températures du jour</div>
       <div class="clima-resumen-row">
@@ -495,20 +534,41 @@ function renderClimaData(d){
       </div>
     </div>
     <div class="tab-clima-cards">
-      <div class="tcc"><i class="ti ti-droplet"></i><div class="v">${pluvioMax}%</div><div class="l">Prob. pluie</div></div>
+      <div class="tcc"><i class="ti ti-droplet"></i><div class="v">${pluvioMax!=null?pluvioMax+'%':'N/D'}</div><div class="l">Prob. pluie</div></div>
       <div class="tcc"><i class="ti ti-cloud-rain"></i><div class="v">${pluvioMm} mm</div><div class="l">Précipitations</div></div>
       <div class="tcc"><i class="ti ti-wind"></i><div class="v">${ventMax} km/h</div><div class="l">Vent max</div></div>
     </div>
-    <p class="stitle"><i class="ti ti-clock"></i>Heure par heure</p>
+    ${hours.length?`<p class="stitle"><i class="ti ti-clock"></i>Heure par heure</p>
     <div class="hora-row">${hours.map((h,i)=>`
       <div class="hslot${i===nowIdx?' now':''}">
         <div class="ht">${h.hora}</div>
         <div class="hv">${h.temp}°</div>
         <i class="ti ${wmoIcon(h.wc)}"></i>
         <div class="hp" style="color:${h.lluvia>50?'#e53935':'#bbb'}">${h.lluvia}%</div>
-      </div>`).join('')}</div>
+      </div>`).join('')}</div>`:''}
     <div class="card"><div class="clbl">Conditions de travail</div><div style="margin-top:6px">${alerta}</div>
     <div class="csub" style="margin-top:5px">${maxLluvia>70?'Évaluer la suspension des travaux en hauteur ou du bétonnage.':'Température et vent dans les plages normales de travail.'}</div></div>`;
+}
+// Affichage hors-ligne à partir du résumé déjà enregistré pour ce jour (climaDia)
+function renderClimaSummaryOnly(c){
+  document.getElementById('miniTemp').textContent=c.tMoy+'°';
+  document.getElementById('miniDet').textContent=wmoDesc(c.wc)+' (enregistré)';
+  document.getElementById('climaContent').innerHTML=`
+    <p class="stitle"><i class="ti ti-cloud-sun"></i>Données enregistrées — Thionck Essyl</p>
+    <div class="clima-resumen">
+      <div class="clima-resumen-title">Températures du jour</div>
+      <div class="clima-resumen-row">
+        <div class="clima-stat"><div class="cv">${c.tMin}°</div><div class="cl">Minimum</div></div>
+        <div class="clima-stat"><div class="cv" style="color:#F5A623;font-size:22px">${c.tMoy}°</div><div class="cl">Moyenne</div></div>
+        <div class="clima-stat"><div class="cv">${c.tMax}°</div><div class="cl">Maximum</div></div>
+      </div>
+    </div>
+    <div class="tab-clima-cards">
+      <div class="tcc"><i class="ti ti-droplet"></i><div class="v">${c.lluvia!=null?c.lluvia+'%':'N/D'}</div><div class="l">Prob. pluie</div></div>
+      <div class="tcc"><i class="ti ti-cloud-rain"></i><div class="v">${c.mm} mm</div><div class="l">Précipitations</div></div>
+      <div class="tcc"><i class="ti ti-wind"></i><div class="v">${c.viento} km/h</div><div class="l">Vent max</div></div>
+    </div>
+    <div class="card"><div class="clbl">Note</div><div class="csub" style="margin-top:5px">Pas de connexion : affichage des dernières données météo enregistrées pour ce jour.</div></div>`;
 }
 function renderClima(){fetchClima()}
 
@@ -720,8 +780,9 @@ function agregarPersona(){
   cerrarModal('modalPersona');
   document.getElementById('mpNombreP').value='';document.getElementById('mpRol').value='';
   renderPersonal();
+  saveHistorique();
 }
-function eliminarPersona(i){if(confirm('Supprimer cette personne ?')){ESTADO[obraIdx].personal.splice(i,1);renderPersonal();}}
+function eliminarPersona(i){if(confirm('Supprimer cette personne ?')){ESTADO[obraIdx].personal.splice(i,1);renderPersonal();saveHistorique();}}
 
 // ── ENGINS ────────────────────────────────────────────────
 const EQ_ICONS={'Bétonnière':'ti-truck','Échafaudage tubulaire':'ti-ladder','Compresseur 200L':'ti-engine','Vibrateur à béton':'ti-tool','Grue à tour':'ti-crane','Petite bétonnière':'ti-truck','Échelle aluminium':'ti-ladder','Bétonnière jeune':'ti-truck','Bétonnière verte':'ti-truck'};
@@ -774,18 +835,14 @@ function agregarEquipo(){
 function eliminarEquipo(i){if(confirm('Supprimer cet engin ?')){ESTADO[obraIdx].equipos.splice(i,1);renderEquipos();}}
 
 // ── PDF avec jsPDF + images base64 ───────────────────────
-function getClimaInfo(){
-  if(!lastClimaData)return{tMin:'--',tMax:'--',tMoy:'--',lluvia:'--',mm:'--',viento:'--',desc:'N/D'};
-  const cw=lastClimaData.current_weather;
-  const daily=lastClimaData.daily;
+function getClimaInfo(est,fk){
+  const c=est&&est.climaDia&&est.climaDia[fk];
+  if(!c)return{tMin:'--',tMax:'--',tMoy:'--',lluvia:'--',mm:'--',viento:'--',desc:'Non consultée ce jour-là'};
   return{
-    tMin:daily?Math.round(daily.temperature_2m_min[0])+'°C':'--',
-    tMax:daily?Math.round(daily.temperature_2m_max[0])+'°C':'--',
-    tMoy:daily?Math.round((daily.temperature_2m_max[0]+daily.temperature_2m_min[0])/2)+'°C':'--',
-    lluvia:daily?Math.round(daily.precipitation_probability_max[0])+'%':'--',
-    mm:daily?(Math.round(daily.precipitation_sum[0]*10)/10)+' mm':'--',
-    viento:daily?Math.round(daily.windspeed_10m_max[0])+' km/h':'--',
-    desc:wmoDesc(cw.weathercode)
+    tMin:c.tMin+'°C',tMax:c.tMax+'°C',tMoy:c.tMoy+'°C',
+    lluvia:(c.lluvia!=null?c.lluvia+'%':'N/D'),
+    mm:c.mm+' mm',viento:c.viento+' km/h',
+    desc:wmoDesc(c.wc)
   };
 }
 
@@ -825,7 +882,7 @@ async function exportarPDF(historique){
     for(let fi=0;fi<fechas.length;fi++){
       const fk=fechas[fi];
       if(fi>0||historique) doc.addPage();
-      await buildPDFPage(doc,obra,fk,est,!historique);
+      await buildPDFPage(doc,obra,fk,est);
     }
 
     const fname=historique
@@ -840,7 +897,7 @@ async function exportarPDF(historique){
   }
 }
 
-async function buildPDFPage(doc,obra,fk,est,inclClima){
+async function buildPDFPage(doc,obra,fk,est){
   const W=210;
   const [yr,m,d]=fk.split('-');
   const fd=new Date(parseInt(yr),parseInt(m)-1,parseInt(d));
@@ -865,9 +922,9 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
   doc.text(fechaStr,W-14,20,{align:'right'});
   y=36;
 
-  // Météo block
-  if(inclClima){
-    const cl=getClimaInfo();
+  // Météo block — toujours affiché, à partir des données enregistrées pour cette date précise
+  {
+    const cl=getClimaInfo(est,fk);
     doc.setFillColor(255,248,225);doc.roundedRect(14,y,W-28,20,2,2,'F');
     doc.setDrawColor(255,224,130);doc.setLineWidth(0.3);doc.roundedRect(14,y,W-28,20,2,2,'S');
     doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(245,124,0);
@@ -993,11 +1050,17 @@ async function buildPDFPage(doc,obra,fk,est,inclClima){
     });
   }
 
-  // Personnel — staff only for main section
-  const staff=est.personal.filter(p=>!p.st);
-  const sousTrait=est.personal.filter(p=>p.st&&p.p);
-  const presentes=staff.filter(p=>p.p);
-  const ausentes=staff.filter(p=>!p.p);
+  // Personnel — présence propre à CETTE date (fk), pas l'état actuel en mémoire
+  const presGuardadas=est.presences&&est.presences[fk];
+  const estaPresente=(p,i)=>presGuardadas&&presGuardadas[i]!==undefined?presGuardadas[i]:p.p;
+  const staff=[],staffPres=[],sousTrait=[];
+  est.personal.forEach((p,i)=>{
+    const pres=estaPresente(p,i);
+    if(p.st){if(pres)sousTrait.push(p);}
+    else{staff.push(p);staffPres.push(pres);}
+  });
+  const presentes=staff.filter((p,idx)=>staffPres[idx]);
+  const ausentes=staff.filter((p,idx)=>!staffPres[idx]);
   sec(`Personnel présent — ${presentes.length} / ${staff.length}`);
   const colW=(W-32)/2;
   // Two columns for present
@@ -1130,6 +1193,7 @@ function renderInventaire(){
 function setStock(idx,val){
   INVENTAIRE[idx].stock=val;
   renderInventaire();
+  saveHistorique();
 }
 
 function commanderMateriau(idx){
@@ -1140,6 +1204,7 @@ function commanderMateriau(idx){
   document.getElementById('mpProveedor').value='';
   document.getElementById('mpEstado').value='urg';
   renderInventaire();
+  saveHistorique();
   abrirModal('modalPedido');
 }
 
@@ -1163,7 +1228,13 @@ function saveHistorique(){
       data[oi].pedidosState=ESTADO[oi].pedidos.map(p=>({nombre:p.nombre,cantidad:p.cantidad,proveedor:p.proveedor,estado:p.estado,foto:p.foto||null}));
       // Save presences per day: {fk: [true,false,...]}
       data[oi].presences=ESTADO[oi].presences||{};
+      // Save personnel roster (names/roles/staff-vs-sous-traitant), so added/deleted people survive a reload
+      data[oi].personalRoster=(ESTADO[oi].personal||[]).map(p=>({n:p.n,r:p.r,i:p.i,st:p.st}));
+      // Save daily weather summary per date, so the historique PDF can show météo for past days
+      data[oi].climaDia=ESTADO[oi].climaDia||{};
     });
+    // Inventaire (stock) is shared across obras, saved once at top level
+    data._inventaire=INVENTAIRE.map(it=>it.stock);
     localStorage.setItem(LS_KEY,JSON.stringify(data));
   }catch(e){console.warn('Save failed:',e);}
 }
@@ -1174,7 +1245,7 @@ function loadHistorique(){
     if(!raw)return;
     const data=JSON.parse(raw);
     Object.keys(data).forEach(oi=>{
-      if(!ESTADO[oi])return;
+      if(oi==='_inventaire'||!ESTADO[oi])return;
       if(data[oi].notas)ESTADO[oi].notas={...data[oi].notas};
       if(data[oi].fotosHora){
         Object.entries(data[oi].fotosHora).forEach(([fk,arr])=>{
@@ -1186,7 +1257,14 @@ function loadHistorique(){
         ESTADO[oi].pedidos=data[oi].pedidosState.map(p=>({...p,foto:p.foto||null}));
       }
       if(data[oi].presences)ESTADO[oi].presences={...data[oi].presences};
+      if(data[oi].personalRoster&&data[oi].personalRoster.length){
+        ESTADO[oi].personal=data[oi].personalRoster.map(p=>({...p,p:true}));
+      }
+      if(data[oi].climaDia)ESTADO[oi].climaDia={...data[oi].climaDia};
     });
+    if(data._inventaire&&Array.isArray(data._inventaire)){
+      data._inventaire.forEach((stock,idx)=>{if(INVENTAIRE[idx]&&typeof stock==='number')INVENTAIRE[idx].stock=stock;});
+    }
   }catch(e){console.warn('Load failed:',e);}
 }
 
