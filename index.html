@@ -172,6 +172,7 @@ input[type=file]{display:none}
   </div>
 
   <div id="tab-diario" class="tab">
+    <div id="cierreDiaBanner"></div>
     <p class="stitle"><i class="ti ti-camera"></i>Photos du jour</p>
     <div class="foto-grid" id="fotoGrid"></div>
     <!-- NO capture attribute = iPhone shows camera + gallery choice -->
@@ -473,8 +474,17 @@ async function fetchClima(){
     } else {
       const[yr,m,day]=fk.split('-');
       const dateStr=yr+'-'+String(m).padStart(2,'0')+'-'+String(day).padStart(2,'0');
-      const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${obra.lat}&longitude=${obra.lon}&start_date=${dateStr}&end_date=${dateStr}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weathercode&timezone=auto`;
-      const r=await fetch(url);d=await r.json();
+      // 1er essai : API forecast avec date passée (données réelles, disponibles immédiatement, jusqu'à ~92 jours en arrière)
+      try{
+        const url1=`https://api.open-meteo.com/v1/forecast?latitude=${obra.lat}&longitude=${obra.lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,windspeed_10m_max,weathercode&timezone=auto&start_date=${dateStr}&end_date=${dateStr}`;
+        const r1=await fetch(url1);const d1=await r1.json();
+        if(d1.error||!d1.daily||!d1.daily.temperature_2m_max||d1.daily.temperature_2m_max[0]==null)throw new Error('no data');
+        d=d1;
+      }catch(e1){
+        // Repli : archive climatique (données de réanalyse, ~5 jours de retard mais couvre les dates plus anciennes)
+        const url2=`https://archive-api.open-meteo.com/v1/archive?latitude=${obra.lat}&longitude=${obra.lon}&start_date=${dateStr}&end_date=${dateStr}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max,weathercode&timezone=auto`;
+        const r2=await fetch(url2);d=await r2.json();
+      }
     }
     if(d.error)throw new Error(d.reason||'Erreur météo');
     climaCache[key]=d;renderClimaData(d,esHoy);
@@ -576,12 +586,21 @@ function renderClima(){fetchClima()}
 function renderDiario(){
   const fk=fechaKey(fechaActual);
   const est=ESTADO[obraIdx];
+  if(!est.cerrado)est.cerrado={};
+  const cerrado=!!est.cerrado[fk];
   if(!est.fotos[fk])est.fotos[fk]=Array(6).fill(null);
   document.getElementById('notaTexto').value=est.notas[fk]||'';
+  document.getElementById('notaTexto').disabled=cerrado;
   document.getElementById('fotoGrid').innerHTML=est.fotos[fk].map((f,i)=>{
-    if(f)return`<div class="fslot ok" onclick="eliminarFoto(${i})"><img src="${f.src}" alt="Photo ${i+1}"><span class="fhora">${f.hora}</span></div>`;
-    return`<div class="fslot" onclick="abrirGaleria(${i})"><i class="ti ti-camera ficon"></i><div class="flbl">Photo ${i+1}</div></div>`;
+    if(f)return`<div class="fslot ok"${cerrado?'':` onclick="eliminarFoto(${i})"`}><img src="${f.src}" alt="Photo ${i+1}"><span class="fhora">${f.hora}</span></div>`;
+    return`<div class="fslot"${cerrado?' style="opacity:.35;pointer-events:none"':` onclick="abrirGaleria(${i})"`}><i class="ti ti-camera ficon"></i><div class="flbl">Photo ${i+1}</div></div>`;
   }).join('');
+  document.getElementById('cierreDiaBanner').innerHTML=cerrado
+    ?`<div class="card" style="background:#f5f5f5;border:1px solid #ddd;display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:10px 12px">
+        <i class="ti ti-lock" style="font-size:16px;color:#888"></i>
+        <div style="font-size:12px;color:#666">Journée clôturée — lecture seule. Le PDF téléchargé ce jour-là est le registre officiel.</div>
+      </div>`
+    :`<button class="btn-sec" onclick="clausurarDia()" style="border-color:#c62828;color:#c62828;margin-bottom:10px"><i class="ti ti-lock"></i>Clôturer la journée (verrouiller + PDF)</button>`;
   const hist=Object.entries(est.notas).filter(([k])=>k!==fk).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,5);
   document.getElementById('historialLista').innerHTML=hist.length===0
     ?'<div style="color:#bbb;font-size:12px;padding:8px 0">Aucun enregistrement précédent</div>'
@@ -595,8 +614,23 @@ function renderDiario(){
       </div>`;}).join('');
 }
 
+// Verrouille définitivement la journée en cours (ou consultée) et télécharge son PDF comme registre officiel
+function clausurarDia(){
+  const fk=fechaKey(fechaActual);
+  const est=ESTADO[obraIdx];
+  if(!confirm('Clôturer cette journée ? Elle passera en lecture seule (notes, photos, présences) et le PDF sera téléchargé comme registre officiel.'))return;
+  if(!est.cerrado)est.cerrado={};
+  est.cerrado[fk]=true;
+  saveHistorique();
+  renderDiario();
+  renderPersonal();
+  exportarPDF(false);
+}
+
 // Key fix: no capture attribute on the input → iOS shows "Take Photo" OR "Choose from Library"
 function abrirGaleria(idx){
+  const fk=fechaKey(fechaActual);
+  if(ESTADO[obraIdx].cerrado&&ESTADO[obraIdx].cerrado[fk]){alert('Journée clôturée : lecture seule.');return;}
   fotoSlotIdx=idx;
   const fi=document.getElementById('fileInput');
   fi.onchange=onFotoSelected;
@@ -633,15 +667,19 @@ function onFotoSelected(e){
 }
 
 function eliminarFoto(i){
+  const fk=fechaKey(fechaActual);
+  if(ESTADO[obraIdx].cerrado&&ESTADO[obraIdx].cerrado[fk]){alert('Journée clôturée : lecture seule.');return;}
   if(confirm('Supprimer cette photo ?')){
-    ESTADO[obraIdx].fotos[fechaKey(fechaActual)][i]=null;
+    ESTADO[obraIdx].fotos[fk][i]=null;
     renderDiario();
   }
 }
 function guardarNota(){
+  const fk=fechaKey(fechaActual);
+  if(ESTADO[obraIdx].cerrado&&ESTADO[obraIdx].cerrado[fk]){alert('Journée clôturée : lecture seule.');return;}
   const txt=document.getElementById('notaTexto').value.trim();
   if(!txt)return;
-  ESTADO[obraIdx].notas[fechaKey(fechaActual)]=txt;
+  ESTADO[obraIdx].notas[fk]=txt;
   saveHistorique();
   renderDiario();
   alert('Note enregistrée');
@@ -741,13 +779,15 @@ function renderPersonal(){
   }
   document.getElementById('personalLista').innerHTML=liste.map(p=>{
     const i=tous.indexOf(p);
+    const fk=fechaKey(fechaActual);
+    const cerrado=!!(ESTADO[obraIdx].cerrado&&ESTADO[obraIdx].cerrado[fk]);
     return`<div class="li-item">
       <div class="av" style="${p.st?'background:#f3e5f5;border-color:#ce93d8;color:#7b1fa2':''}">${p.i}</div>
       <div style="flex:1">
         <div class="li-name">${p.n}</div>
         <div class="li-rol">${p.r}${p.st?' · <span style="color:#9c27b0;font-size:9px">SOUS-TRAITANT</span>':''}</div>
       </div>
-      <div class="chk ${p.p?'pres':'abs'}" onclick="togglePres(${i})">
+      <div class="chk ${p.p?'pres':'abs'}" onclick="togglePres(${i})" style="${cerrado?'opacity:.4':''}">
         <i class="ti ${p.p?'ti-check':'ti-x'}" style="font-size:14px"></i>
       </div>
       <button class="trash-btn" onclick="eliminarPersona(${i})"><i class="ti ti-trash"></i></button>
@@ -755,6 +795,8 @@ function renderPersonal(){
   }).join('');
 }
 function togglePres(i){
+  const fk=fechaKey(fechaActual);
+  if(ESTADO[obraIdx].cerrado&&ESTADO[obraIdx].cerrado[fk]){alert('Journée clôturée : présences verrouillées.');return;}
   ESTADO[obraIdx].personal[i].p=!ESTADO[obraIdx].personal[i].p;
   savePresencesDay();
   renderPersonal();
@@ -768,9 +810,11 @@ function savePresencesDay(){
 function loadPresencesDay(){
   const fk=fechaKey(fechaActual);
   const saved=ESTADO[obraIdx].presences&&ESTADO[obraIdx].presences[fk];
-  if(saved){
-    ESTADO[obraIdx].personal.forEach((p,i)=>{if(saved[i]!==undefined)p.p=saved[i];});
-  }
+  // Si no hay presencias guardadas para este día (día nuevo), se parte de cero — nadie marcado.
+  // Si hay datos guardados, se restauran tal cual quedaron ese día.
+  ESTADO[obraIdx].personal.forEach((p,i)=>{
+    p.p=(saved&&saved[i]!==undefined)?saved[i]:false;
+  });
 }
 function agregarPersona(){
   const n=document.getElementById('mpNombreP').value.trim();if(!n)return;
@@ -780,9 +824,9 @@ function agregarPersona(){
   cerrarModal('modalPersona');
   document.getElementById('mpNombreP').value='';document.getElementById('mpRol').value='';
   renderPersonal();
-  saveHistorique();
+  savePresencesDay();
 }
-function eliminarPersona(i){if(confirm('Supprimer cette personne ?')){ESTADO[obraIdx].personal.splice(i,1);renderPersonal();saveHistorique();}}
+function eliminarPersona(i){if(confirm('Supprimer cette personne ?')){ESTADO[obraIdx].personal.splice(i,1);renderPersonal();savePresencesDay();}}
 
 // ── ENGINS ────────────────────────────────────────────────
 const EQ_ICONS={'Bétonnière':'ti-truck','Échafaudage tubulaire':'ti-ladder','Compresseur 200L':'ti-engine','Vibrateur à béton':'ti-tool','Grue à tour':'ti-crane','Petite bétonnière':'ti-truck','Échelle aluminium':'ti-ladder','Bétonnière jeune':'ti-truck','Bétonnière verte':'ti-truck'};
@@ -1232,6 +1276,8 @@ function saveHistorique(){
       data[oi].personalRoster=(ESTADO[oi].personal||[]).map(p=>({n:p.n,r:p.r,i:p.i,st:p.st}));
       // Save daily weather summary per date, so the historique PDF can show météo for past days
       data[oi].climaDia=ESTADO[oi].climaDia||{};
+      // Save which days are locked/closed (cerrado)
+      data[oi].cerrado=ESTADO[oi].cerrado||{};
     });
     // Inventaire (stock) is shared across obras, saved once at top level
     data._inventaire=INVENTAIRE.map(it=>it.stock);
@@ -1261,6 +1307,7 @@ function loadHistorique(){
         ESTADO[oi].personal=data[oi].personalRoster.map(p=>({...p,p:true}));
       }
       if(data[oi].climaDia)ESTADO[oi].climaDia={...data[oi].climaDia};
+      if(data[oi].cerrado)ESTADO[oi].cerrado={...data[oi].cerrado};
     });
     if(data._inventaire&&Array.isArray(data._inventaire)){
       data._inventaire.forEach((stock,idx)=>{if(INVENTAIRE[idx]&&typeof stock==='number')INVENTAIRE[idx].stock=stock;});
