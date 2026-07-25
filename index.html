@@ -210,6 +210,11 @@ input[type=file]{display:none}
     </div>
     <p class="stitle"><i class="ti ti-users"></i><span id="personalTabTitle">Personnel fixe</span></p>
     <div class="card" id="personalLista"></div>
+    <div id="notaSTWrap" style="display:none;margin-top:10px">
+      <p class="stitle"><i class="ti ti-notes"></i>Travaux réalisés par les sous-traitants</p>
+      <textarea class="inp" id="notaST" rows="3" placeholder="Description des travaux effectués, observations..."></textarea>
+      <button class="btn-primary" onclick="guardarNotaST()" style="margin-top:6px"><i class="ti ti-device-floppy"></i>Enregistrer la note</button>
+    </div>
   </div>
 
   <div id="tab-equipos" class="tab">
@@ -387,6 +392,8 @@ let ESTADO={
     equipos:[
       {nombre:"Bétonnière jeune",estado:"ok",nota:""},
       {nombre:"Bétonnière verte",estado:"ok",nota:""},
+      {nombre:"Scie circulaire",estado:"ok",nota:""},
+      {nombre:"Poste à souder",estado:"ok",nota:""},
     ],
     fotos:{},notas:{},presences:{}
   },
@@ -765,6 +772,16 @@ function agregarPedido(){
 function renderPersonal(){
   const tous=ESTADO[obraIdx].personal;
   const filtre=personalTab==='st';
+  const fk=fechaKey(fechaActual);
+  const est=ESTADO[obraIdx];
+  if(!est.notasST)est.notasST={};
+  const cerradoDia=!!(est.cerrado&&est.cerrado[fk]);
+  const notaSTWrap=document.getElementById('notaSTWrap');
+  notaSTWrap.style.display=filtre?'block':'none';
+  if(filtre){
+    document.getElementById('notaST').value=est.notasST[fk]||'';
+    document.getElementById('notaST').disabled=cerradoDia;
+  }
   const query=(document.getElementById('buscarPersonal')?.value||'').toLowerCase().trim();
   const liste=tous.filter(p=>p.st===filtre&&(query===''||p.n.toLowerCase().includes(query)||p.r.toLowerCase().includes(query))).sort((a,b)=>a.n.localeCompare(b.n,'fr'));
   // Counters always use full staff list (not sous-traitants)
@@ -779,8 +796,7 @@ function renderPersonal(){
   }
   document.getElementById('personalLista').innerHTML=liste.map(p=>{
     const i=tous.indexOf(p);
-    const fk=fechaKey(fechaActual);
-    const cerrado=!!(ESTADO[obraIdx].cerrado&&ESTADO[obraIdx].cerrado[fk]);
+    const cerrado=cerradoDia;
     return`<div class="li-item">
       <div class="av" style="${p.st?'background:#f3e5f5;border-color:#ce93d8;color:#7b1fa2':''}">${p.i}</div>
       <div style="flex:1">
@@ -816,6 +832,15 @@ function loadPresencesDay(){
     p.p=(saved&&saved[i]!==undefined)?saved[i]:false;
   });
 }
+function guardarNotaST(){
+  const fk=fechaKey(fechaActual);
+  if(ESTADO[obraIdx].cerrado&&ESTADO[obraIdx].cerrado[fk]){alert('Journée clôturée : lecture seule.');return;}
+  const txt=document.getElementById('notaST').value.trim();
+  if(!ESTADO[obraIdx].notasST)ESTADO[obraIdx].notasST={};
+  ESTADO[obraIdx].notasST[fk]=txt;
+  saveHistorique();
+  alert('Note enregistrée');
+}
 function agregarPersona(){
   const n=document.getElementById('mpNombreP').value.trim();if(!n)return;
   const iv=n.split(' ').filter(w=>w.length>1).slice(0,2).map(w=>w[0].toUpperCase()).join('');
@@ -829,7 +854,7 @@ function agregarPersona(){
 function eliminarPersona(i){if(confirm('Supprimer cette personne ?')){ESTADO[obraIdx].personal.splice(i,1);renderPersonal();savePresencesDay();}}
 
 // ── ENGINS ────────────────────────────────────────────────
-const EQ_ICONS={'Bétonnière':'ti-truck','Échafaudage tubulaire':'ti-ladder','Compresseur 200L':'ti-engine','Vibrateur à béton':'ti-tool','Grue à tour':'ti-crane','Petite bétonnière':'ti-truck','Échelle aluminium':'ti-ladder','Bétonnière jeune':'ti-truck','Bétonnière verte':'ti-truck'};
+const EQ_ICONS={'Bétonnière':'ti-truck','Échafaudage tubulaire':'ti-ladder','Compresseur 200L':'ti-engine','Vibrateur à béton':'ti-tool','Grue à tour':'ti-crane','Petite bétonnière':'ti-truck','Échelle aluminium':'ti-ladder','Bétonnière jeune':'ti-truck','Bétonnière verte':'ti-truck','Scie circulaire':'ti-circle-dot','Poste à souder':'ti-plug'};
 function renderEquipos(){
   const eqs=ESTADO[obraIdx].equipos;
   document.getElementById('equiposLista').innerHTML=eqs.length===0
@@ -1094,54 +1119,32 @@ async function buildPDFPage(doc,obra,fk,est){
     });
   }
 
-  // Personnel — présence propre à CETTE date (fk), pas l'état actuel en mémoire
+  // Personnel — on n'affiche plus le personnel fixe (non utilisé actuellement), seulement les sous-traitants
   const presGuardadas=est.presences&&est.presences[fk];
   const estaPresente=(p,i)=>presGuardadas&&presGuardadas[i]!==undefined?presGuardadas[i]:p.p;
-  const staff=[],staffPres=[],sousTrait=[];
+  const sousTrait=[];
   est.personal.forEach((p,i)=>{
-    const pres=estaPresente(p,i);
-    if(p.st){if(pres)sousTrait.push(p);}
-    else{staff.push(p);staffPres.push(pres);}
+    if(p.st&&estaPresente(p,i))sousTrait.push(p);
   });
-  const presentes=staff.filter((p,idx)=>staffPres[idx]);
-  const ausentes=staff.filter((p,idx)=>!staffPres[idx]);
-  sec(`Personnel présent — ${presentes.length} / ${staff.length}`);
-  const colW=(W-32)/2;
-  // Two columns for present
-  for(let i=0;i<presentes.length;i++){
-    const cx=17+(i%2)*colW;
-    if(i%2===0){if(y>265){doc.addPage();y=14;}}
-    doc.setTextColor(...vertOk);doc.setFontSize(9);doc.setFont('helvetica','bold');
-    doc.text('OK',cx,y);
-    doc.setFont('helvetica','normal');doc.setTextColor(...noir);
-    doc.text(presentes[i].n,cx+9,y);
-    doc.setTextColor(...gris);doc.setFontSize(8);doc.text(presentes[i].r,cx+9,y+4);
-    if(i%2===1||i===presentes.length-1)y+=10;
-  }
-  if(ausentes.length>0){
-    y+=2;
-    if(y>265){doc.addPage();y=14;}
-    doc.setFontSize(8);doc.setTextColor(...rougeBad);doc.setFont('helvetica','bold');
-    doc.text('ABSENTS:',17,y);y+=5;doc.setFont('helvetica','normal');
-    ausentes.forEach(p=>{
-      if(y>270){doc.addPage();y=14;}
-      doc.setTextColor(...rougeBad);doc.setFontSize(9);
-      doc.text('--  '+p.n+'  ('+p.r+')',20,y);y+=5;
-    });
-  }
-  // Sous-traitants présents
   if(sousTrait.length>0){
-    y+=3;
-    if(y>260){doc.addPage();y=14;}
-    doc.setFontSize(8);doc.setTextColor(123,31,162);doc.setFont('helvetica','bold');
-    doc.text('SOUS-TRAITANTS PRESENTS:',17,y);y+=5;doc.setFont('helvetica','normal');
+    sec(`Sous-traitants présents — ${sousTrait.length}`);
     sousTrait.forEach(p=>{
       if(y>270){doc.addPage();y=14;}
-      doc.setTextColor(123,31,162);doc.setFontSize(9);
-      doc.text('>>  '+p.n+'  ('+p.r+')',20,y);y+=5;
+      doc.setTextColor(123,31,162);doc.setFontSize(9);doc.setFont('helvetica','bold');
+      doc.text('>>  '+p.n+'  ('+p.r+')',17,y);y+=5;
     });
+    const notaST=(est.notasST&&est.notasST[fk])||'';
+    if(notaST){
+      y+=2;
+      if(y>260){doc.addPage();y=14;}
+      doc.setFontSize(8);doc.setTextColor(123,31,162);doc.setFont('helvetica','bold');
+      doc.text('TRAVAUX RÉALISÉS:',17,y);y+=5;
+      doc.setFont('helvetica','normal');doc.setTextColor(...noir);doc.setFontSize(9);
+      const lines=doc.splitTextToSize(notaST,W-34);
+      lines.forEach(l=>{if(y>275){doc.addPage();y=14;}doc.text(l,17,y);y+=5;});
+    }
+    y+=3;
   }
-  y+=3;
 
   // Footer
   y=Math.max(y+6,280);
@@ -1161,11 +1164,15 @@ const INVENTAIRE=[
   // LIANTS
   {cat:"Liants",      nom:"Ciment 32.5 — Agnamba Thionck",          stock:3, note:"Fondations"},
   {cat:"Liants",      nom:"Ciment 42.5 — Dakar (poutres)",          stock:3, note:"Cmdr 400 sacs (20T) pour 504/507"},
-  {cat:"Liants",      nom:"Chaux vive",                             stock:1, note:"Cmdr 2 pots"},
+  {cat:"Liants",      nom:"Chaux vive",                             stock:0, note:"Manque — à commander"},
   // BOIS
   {cat:"Bois",        nom:"Bois blanc — portes et coffrages",        stock:1, note:"Planches 19x400"},
   {cat:"Bois",        nom:"Bois rouge — charpente",                  stock:3, note:"2054 ML x 40mm"},
   {cat:"Bois",        nom:"Contreplaqué — coffrages",                stock:3, note:""},
+  {cat:"Bois",        nom:"Bois pour les fenêtres",                  stock:0, note:"Manque — à commander"},
+  // BRIQUES
+  {cat:"Briques",     nom:"Briques ciment",                          stock:0, note:"Manque — à commander"},
+  {cat:"Briques",     nom:"Briques BTC",                             stock:0, note:"Manque — à commander"},
   // ARMATURES
   {cat:"Armatures",   nom:"Fer à béton ø6",                         stock:3, note:""},
   {cat:"Armatures",   nom:"Fer à béton ø8",                         stock:0, note:""},
@@ -1278,6 +1285,8 @@ function saveHistorique(){
       data[oi].climaDia=ESTADO[oi].climaDia||{};
       // Save which days are locked/closed (cerrado)
       data[oi].cerrado=ESTADO[oi].cerrado||{};
+      // Save daily notes about subcontractor work
+      data[oi].notasST=ESTADO[oi].notasST||{};
     });
     // Inventaire (stock) is shared across obras, saved once at top level
     data._inventaire=INVENTAIRE.map(it=>it.stock);
@@ -1308,6 +1317,7 @@ function loadHistorique(){
       }
       if(data[oi].climaDia)ESTADO[oi].climaDia={...data[oi].climaDia};
       if(data[oi].cerrado)ESTADO[oi].cerrado={...data[oi].cerrado};
+      if(data[oi].notasST)ESTADO[oi].notasST={...data[oi].notasST};
     });
     if(data._inventaire&&Array.isArray(data._inventaire)){
       data._inventaire.forEach((stock,idx)=>{if(INVENTAIRE[idx]&&typeof stock==='number')INVENTAIRE[idx].stock=stock;});
