@@ -140,8 +140,7 @@ input[type=file]{display:none}
     <i class="ti ti-building" style="font-size:16px;color:#1a1a1a"></i>
     <select id="obraSelect" onchange="cambiarObra()">
       <option value="0">Bajankusor — Thionck Essyl</option>
-      <option value="1">Chantier Nord</option>
-      <option value="2">Local Commercial</option>
+      <option value="1">Kolda</option>
     </select>
     <i class="ti ti-chevron-down" style="font-size:14px;color:#1a1a1a"></i>
   </div>
@@ -159,11 +158,11 @@ input[type=file]{display:none}
 </div>
 
 <nav class="nav">
-  <button class="nb active" onclick="tab('clima',this)"><i class="ti ti-cloud-sun"></i>Météo</button>
-  <button class="nb" onclick="tab('diario',this)"><i class="ti ti-camera"></i>Journal</button>
-  <button class="nb" onclick="tab('materiales',this)"><i class="ti ti-package"></i>Matériaux</button>
-  <button class="nb" onclick="tab('equipos',this)"><i class="ti ti-crane"></i>Engins</button>
-  <button class="nb" onclick="tab('personal',this)"><i class="ti ti-users"></i>Personnel</button>
+  <button class="nb active" data-tab="clima" onclick="tab('clima',this)"><i class="ti ti-cloud-sun"></i>Météo</button>
+  <button class="nb" data-tab="diario" onclick="tab('diario',this)"><i class="ti ti-camera"></i>Journal</button>
+  <button class="nb" data-tab="materiales" onclick="tab('materiales',this)"><i class="ti ti-package"></i>Matériaux</button>
+  <button class="nb" data-tab="equipos" onclick="tab('equipos',this)"><i class="ti ti-crane"></i>Engins</button>
+  <button class="nb" data-tab="personal" onclick="tab('personal',this)"><i class="ti ti-users"></i>Personnel</button>
 </nav>
 
 <div class="content">
@@ -192,7 +191,7 @@ input[type=file]{display:none}
     <p class="stitle"><i class="ti ti-package"></i>Commandes en cours</p>
     <div id="pedidosLista"></div>
     <div class="sep"></div>
-    <p class="stitle"><i class="ti ti-stack"></i>Inventaire Bajankusor</p>
+    <p class="stitle"><i class="ti ti-stack"></i>Inventaire <span id="invObraNombre">Bajankusor</span></p>
     <div id="inventaireLista"></div>
   </div>
 
@@ -282,9 +281,9 @@ input[type=file]{display:none}
 
 <script>
 const OBRAS=[
-  {nombre:"Bajankusor — Thionck Essyl",lat:12.7599,lon:-16.0797},
-  {nombre:"Chantier Nord",lat:12.780,lon:-16.060},
-  {nombre:"Local Commercial",lat:12.750,lon:-16.090}
+  {nombre:"Bajankusor — Thionck Essyl",lat:12.7599,lon:-16.0797,tabs:['clima','diario','materiales','equipos','personal']},
+  // Kolda, intérieur de la Casamance — TODO: ajuster les coordonnées précises si nécessaire
+  {nombre:"Kolda",lat:12.8939,lon:-14.9406,tabs:['clima','diario','materiales']}
 ];
 const JOURS=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 const JOURS_C=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
@@ -398,15 +397,41 @@ let ESTADO={
     fotos:{},notas:{},presences:{}
   },
   1:{
-    personal:[{n:"Aliou Camara",r:"Chef de chantier",i:"AC",p:true},{n:"Serigne Mbaye",r:"Maçon",i:"SM",p:false}],
-    pedidos:[{nombre:"Blocs de béton",cantidad:"500 u",proveedor:"Béton Plus",estado:"transit",foto:null}],
-    equipos:[{nombre:"Petite bétonnière",estado:"ok",nota:""}],
-    fotos:{},notas:{},presences:{}
-  },
-  2:{
-    personal:[{n:"Moussa Diallo",r:"Électricien",i:"MD",p:true}],
-    pedidos:[],equipos:[{nombre:"Échelle aluminium",estado:"ok",nota:""}],
-    fotos:{},notas:{},presences:{}
+    // Kolda — sans personnel ni équipements (pas de pestaña correspondante)
+    personal:[],
+    pedidos:[],
+    equipos:[],
+    fotos:{},notas:{},presences:{},
+    inventario:[
+      // Mêmes catégories que Bajankusor, stock à 0 pour démarrer
+      {cat:"Granulats",   nom:"Gravier basalte béton ø3-8",     stock:0, note:""},
+      {cat:"Granulats",   nom:"Gravier basalte béton ø8-16",    stock:0, note:""},
+      {cat:"Granulats",   nom:"Gravier — dalles / béton propreté", stock:0, note:"ø3-8"},
+      {cat:"Granulats",   nom:"Gravier pisé (couleur claire)",  stock:0, note:"ø8-16"},
+      {cat:"Granulats",   nom:"Sable blanc",                    stock:0, note:""},
+      {cat:"Liants",      nom:"Ciment 32.5",                    stock:0, note:"Fondations"},
+      {cat:"Liants",      nom:"Ciment 42.5 (poutres)",          stock:0, note:""},
+      {cat:"Liants",      nom:"Chaux vive",                     stock:0, note:""},
+      {cat:"Bois",        nom:"Bois blanc — portes et coffrages",stock:0, note:""},
+      {cat:"Bois",        nom:"Bois rouge — charpente",         stock:0, note:""},
+      {cat:"Bois",        nom:"Contreplaqué — coffrages",       stock:0, note:""},
+      {cat:"Bois",        nom:"Bois pour les fenêtres",         stock:0, note:""},
+      {cat:"Briques",     nom:"Briques ciment",                 stock:0, note:""},
+      {cat:"Briques",     nom:"Briques BTC",                    stock:0, note:""},
+      {cat:"Armatures",   nom:"Fer à béton ø6",                 stock:0, note:""},
+      {cat:"Armatures",   nom:"Fer à béton ø8",                 stock:0, note:""},
+      {cat:"Armatures",   nom:"Fer à béton ø10",                stock:0, note:""},
+      {cat:"Armatures",   nom:"Fer à béton ø12",                stock:0, note:""},
+      {cat:"Armatures",   nom:"Fer à béton ø16",                stock:0, note:""},
+      {cat:"Armatures",   nom:"Fer à béton ø20",                stock:0, note:""},
+      {cat:"Métallerie",  nom:"Platine base",                   stock:0, note:""},
+      {cat:"Métallerie",  nom:"Platine T",                      stock:0, note:""},
+      {cat:"Finitions",   nom:"Carreaux rouges 24x12cm",        stock:0, note:""},
+      {cat:"Finitions",   nom:"Carreaux blancs 20x30cm",        stock:0, note:""},
+      {cat:"Finitions",   nom:"Peinture étanchéité poutres",    stock:0, note:""},
+      {cat:"Finitions",   nom:"Sika",                           stock:0, note:""},
+      {cat:"Divers",      nom:"Paille",                         stock:0, note:""},
+    ]
   }
 };
 
@@ -440,7 +465,27 @@ function renderTabActual(){
 }
 function cambiarObra(){
   obraIdx=parseInt(document.getElementById('obraSelect').value);
-  climaCache={};lastClimaData=null;fetchClima();loadPresencesDay();renderTabActual();
+  climaCache={};lastClimaData=null;
+  aplicarTabsObra();
+  fetchClima();loadPresencesDay();renderTabActual();
+}
+
+// Muestre/masque les onglets de nav selon les pestañas habilitées pour l'obra active (ex: Kolda n'a ni Engins ni Personnel)
+function aplicarTabsObra(){
+  const permitidos=OBRAS[obraIdx].tabs||['clima','diario','materiales','equipos','personal'];
+  document.querySelectorAll('.nb').forEach(btn=>{
+    const id=btn.getAttribute('data-tab');
+    btn.style.display=permitidos.includes(id)?'':'none';
+  });
+  if(!permitidos.includes(currentTabId)){
+    const nuevoTab=permitidos.includes('clima')?'clima':permitidos[0];
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('vis'));
+    document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+    document.getElementById('tab-'+nuevoTab).classList.add('vis');
+    const btn=document.querySelector('.nb[data-tab="'+nuevoTab+'"]');
+    if(btn)btn.classList.add('active');
+    currentTabId=nuevoTab;
+  }
 }
 
 // ── MÉTÉO ─────────────────────────────────────────────────
@@ -997,7 +1042,7 @@ async function buildPDFPage(doc,obra,fk,est){
     doc.setFillColor(255,248,225);doc.roundedRect(14,y,W-28,20,2,2,'F');
     doc.setDrawColor(255,224,130);doc.setLineWidth(0.3);doc.roundedRect(14,y,W-28,20,2,2,'S');
     doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(245,124,0);
-    doc.text('MÉTÉO DU JOUR — Thionck Essyl',18,y+6);
+    doc.text('MÉTÉO DU JOUR — '+obra.nombre,18,y+6);
     doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...gris);
     doc.text(`Min ${cl.tMin}  /  Moy ${cl.tMoy}  /  Max ${cl.tMax}`,18,y+13);
     doc.text(`Pluie: ${cl.lluvia} (${cl.mm})   Vent max: ${cl.viento}   ${cl.desc}`,90,y+13);
@@ -1094,56 +1139,62 @@ async function buildPDFPage(doc,obra,fk,est){
   }
   y+=2;
 
-  // Engins
-  sec('Engins sur chantier');
-  const eqs=est.equipos;
-  if(eqs.length===0){lin('Aucun engin enregistré');}
-  else{
-    eqs.forEach((e)=>{
-      if(y>265){doc.addPage();y=14;}
-      const esAlert=e.estado==='alert';
-      const lbl=esAlert?'En réparation':'Opérationnel';
-      const col=esAlert?rougeBad:vertOk;
-      doc.setTextColor(...col);doc.setFontSize(8);doc.setFont('helvetica','bold');
-      doc.text(esAlert?'REP ':'OK  ',17,y);
-      doc.setFont('helvetica','normal');doc.setTextColor(...noir);doc.setFontSize(9.5);doc.text(e.nombre,30,y);
-      doc.setTextColor(...gris);doc.setFontSize(8);doc.text(lbl,30,y+4);
-      y+=esAlert&&e.nota?9:9;
-      if(esAlert&&e.nota){
-        if(y>270){doc.addPage();y=14;}
-        doc.setTextColor(...rougeBad);doc.setFontSize(8);doc.setFont('helvetica','italic');
-        const lines=doc.splitTextToSize('Manque: '+e.nota,W-44);
-        doc.text(lines,30,y);y+=lines.length*4.5+3;
-        doc.setFont('helvetica','normal');
-      }
-    });
+  // Engins — uniquement pour les obras qui ont cette pestaña activée
+  const tieneEquipos=(obra.tabs||['equipos']).includes('equipos');
+  if(tieneEquipos){
+    sec('Engins sur chantier');
+    const eqs=est.equipos;
+    if(eqs.length===0){lin('Aucun engin enregistré');}
+    else{
+      eqs.forEach((e)=>{
+        if(y>265){doc.addPage();y=14;}
+        const esAlert=e.estado==='alert';
+        const lbl=esAlert?'En réparation':'Opérationnel';
+        const col=esAlert?rougeBad:vertOk;
+        doc.setTextColor(...col);doc.setFontSize(8);doc.setFont('helvetica','bold');
+        doc.text(esAlert?'REP ':'OK  ',17,y);
+        doc.setFont('helvetica','normal');doc.setTextColor(...noir);doc.setFontSize(9.5);doc.text(e.nombre,30,y);
+        doc.setTextColor(...gris);doc.setFontSize(8);doc.text(lbl,30,y+4);
+        y+=esAlert&&e.nota?9:9;
+        if(esAlert&&e.nota){
+          if(y>270){doc.addPage();y=14;}
+          doc.setTextColor(...rougeBad);doc.setFontSize(8);doc.setFont('helvetica','italic');
+          const lines=doc.splitTextToSize('Manque: '+e.nota,W-44);
+          doc.text(lines,30,y);y+=lines.length*4.5+3;
+          doc.setFont('helvetica','normal');
+        }
+      });
+    }
   }
 
   // Personnel — on n'affiche plus le personnel fixe (non utilisé actuellement), seulement les sous-traitants
-  const presGuardadas=est.presences&&est.presences[fk];
-  const estaPresente=(p,i)=>presGuardadas&&presGuardadas[i]!==undefined?presGuardadas[i]:p.p;
-  const sousTrait=[];
-  est.personal.forEach((p,i)=>{
-    if(p.st&&estaPresente(p,i))sousTrait.push(p);
-  });
-  if(sousTrait.length>0){
-    sec(`Sous-traitants présents — ${sousTrait.length}`);
-    sousTrait.forEach(p=>{
-      if(y>270){doc.addPage();y=14;}
-      doc.setTextColor(123,31,162);doc.setFontSize(9);doc.setFont('helvetica','bold');
-      doc.text('>>  '+p.n+'  ('+p.r+')',17,y);y+=5;
+  const tienePersonal=(obra.tabs||['personal']).includes('personal');
+  if(tienePersonal){
+    const presGuardadas=est.presences&&est.presences[fk];
+    const estaPresente=(p,i)=>presGuardadas&&presGuardadas[i]!==undefined?presGuardadas[i]:p.p;
+    const sousTrait=[];
+    est.personal.forEach((p,i)=>{
+      if(p.st&&estaPresente(p,i))sousTrait.push(p);
     });
-    const notaST=(est.notasST&&est.notasST[fk])||'';
-    if(notaST){
-      y+=2;
-      if(y>260){doc.addPage();y=14;}
-      doc.setFontSize(8);doc.setTextColor(123,31,162);doc.setFont('helvetica','bold');
-      doc.text('TRAVAUX RÉALISÉS:',17,y);y+=5;
-      doc.setFont('helvetica','normal');doc.setTextColor(...noir);doc.setFontSize(9);
-      const lines=doc.splitTextToSize(notaST,W-34);
-      lines.forEach(l=>{if(y>275){doc.addPage();y=14;}doc.text(l,17,y);y+=5;});
+    if(sousTrait.length>0){
+      sec(`Sous-traitants présents — ${sousTrait.length}`);
+      sousTrait.forEach(p=>{
+        if(y>270){doc.addPage();y=14;}
+        doc.setTextColor(123,31,162);doc.setFontSize(9);doc.setFont('helvetica','bold');
+        doc.text('>>  '+p.n+'  ('+p.r+')',17,y);y+=5;
+      });
+      const notaST=(est.notasST&&est.notasST[fk])||'';
+      if(notaST){
+        y+=2;
+        if(y>260){doc.addPage();y=14;}
+        doc.setFontSize(8);doc.setTextColor(123,31,162);doc.setFont('helvetica','bold');
+        doc.text('TRAVAUX RÉALISÉS:',17,y);y+=5;
+        doc.setFont('helvetica','normal');doc.setTextColor(...noir);doc.setFontSize(9);
+        const lines=doc.splitTextToSize(notaST,W-34);
+        lines.forEach(l=>{if(y>275){doc.addPage();y=14;}doc.text(l,17,y);y+=5;});
+      }
+      y+=3;
     }
-    y+=3;
   }
 
   // Footer
@@ -1191,6 +1242,8 @@ const INVENTAIRE=[
   // DIVERS
   {cat:"Divers",      nom:"Paille (Atab)",                           stock:5, note:"Commandé pour 506+508"},
 ];
+// L'inventaire de Bajankusor (obra 0) pointe vers ce tableau ; Kolda (obra 1) a le sien propre défini plus haut dans ESTADO[1].inventario
+ESTADO[0].inventario=INVENTAIRE;
 
 function dotStock(s){
   // s = 0..5. 0 = épuisé (rouge), 1-2 = bas, 3 = moyen, 4-5 = bon
@@ -1205,13 +1258,15 @@ function dotStock(s){
 }
 
 function renderInventaire(){
-  const cats=[...new Set(INVENTAIRE.map(i=>i.cat))];
+  const inv=ESTADO[obraIdx].inventario||[];
+  document.getElementById('invObraNombre').textContent=OBRAS[obraIdx].nombre;
+  const cats=[...new Set(inv.map(i=>i.cat))];
   document.getElementById('inventaireLista').innerHTML=cats.map(cat=>{
-    const items=INVENTAIRE.filter(i=>i.cat===cat);
+    const items=inv.filter(i=>i.cat===cat);
     return`<div style="margin-bottom:14px">
       <div style="font-size:10px;font-weight:700;color:#bbb;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;padding-left:2px">${cat}</div>
       ${items.map(it=>{
-        const idx=INVENTAIRE.indexOf(it);
+        const idx=inv.indexOf(it);
         const s=it.stock;
         const stateLbl=s===5?'Plein':s===3?'Moyen':'Commander';
         const stateCol=s===5?'#2e7d32':s===3?'#f57f17':'#c62828';
@@ -1242,14 +1297,14 @@ function renderInventaire(){
 }
 
 function setStock(idx,val){
-  INVENTAIRE[idx].stock=val;
+  ESTADO[obraIdx].inventario[idx].stock=val;
   renderInventaire();
   saveHistorique();
 }
 
 function commanderMateriau(idx){
-  INVENTAIRE[idx].stock=0;
-  const it=INVENTAIRE[idx];
+  ESTADO[obraIdx].inventario[idx].stock=0;
+  const it=ESTADO[obraIdx].inventario[idx];
   document.getElementById('mpNombre').value=it.nom;
   document.getElementById('mpCantidad').value='';
   document.getElementById('mpProveedor').value='';
@@ -1287,9 +1342,9 @@ function saveHistorique(){
       data[oi].cerrado=ESTADO[oi].cerrado||{};
       // Save daily notes about subcontractor work
       data[oi].notasST=ESTADO[oi].notasST||{};
+      // Inventaire (stock), propre à chaque obra
+      data[oi].inventario=(ESTADO[oi].inventario||[]).map(it=>it.stock);
     });
-    // Inventaire (stock) is shared across obras, saved once at top level
-    data._inventaire=INVENTAIRE.map(it=>it.stock);
     localStorage.setItem(LS_KEY,JSON.stringify(data));
   }catch(e){console.warn('Save failed:',e);}
 }
@@ -1300,7 +1355,7 @@ function loadHistorique(){
     if(!raw)return;
     const data=JSON.parse(raw);
     Object.keys(data).forEach(oi=>{
-      if(oi==='_inventaire'||!ESTADO[oi])return;
+      if(!ESTADO[oi])return;
       if(data[oi].notas)ESTADO[oi].notas={...data[oi].notas};
       if(data[oi].fotosHora){
         Object.entries(data[oi].fotosHora).forEach(([fk,arr])=>{
@@ -1318,10 +1373,10 @@ function loadHistorique(){
       if(data[oi].climaDia)ESTADO[oi].climaDia={...data[oi].climaDia};
       if(data[oi].cerrado)ESTADO[oi].cerrado={...data[oi].cerrado};
       if(data[oi].notasST)ESTADO[oi].notasST={...data[oi].notasST};
+      if(data[oi].inventario&&Array.isArray(data[oi].inventario)&&ESTADO[oi].inventario){
+        data[oi].inventario.forEach((stock,idx)=>{if(ESTADO[oi].inventario[idx]&&typeof stock==='number')ESTADO[oi].inventario[idx].stock=stock;});
+      }
     });
-    if(data._inventaire&&Array.isArray(data._inventaire)){
-      data._inventaire.forEach((stock,idx)=>{if(INVENTAIRE[idx]&&typeof stock==='number')INVENTAIRE[idx].stock=stock;});
-    }
   }catch(e){console.warn('Load failed:',e);}
 }
 
@@ -1333,6 +1388,7 @@ document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',fun
 // ── INIT ──────────────────────────────────────────────────
 loadHistorique();
 loadPresencesDay();
+aplicarTabsObra();
 actualizarFecha();
 renderTabActual();
 fetchClima();
